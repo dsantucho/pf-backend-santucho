@@ -14,8 +14,6 @@ class ProductManager {
       // Verificar si el CODE ya existe. It returns true if, in the array, it finds an element for which the provided function returns true; otherwise it returns false. It doesn't modify the array.
       const codeExists = this.products.some((product) => product.code === code);
       if (codeExists) {
-        //throw new Error('Error: Código de producto duplicado');
-        //console.log(codeExists);
         return console.log('Error: Código de producto duplicado');
       }
   
@@ -43,13 +41,12 @@ class ProductManager {
     getProductById(productId) {
       const product = this.products.find((p) => p.id === productId);
       if (!product) {
-        //throw new Error('Error: Producto no encontrado');
         return console.log('Error: Producto no encontrado');
       }
       return product;
     }
   
-    // Función para generar un id único (puedes usar una librería como uuid para esto)
+    //TODO: Cambiar el deprecado. Función para generar un id único  
     generateUniqueId() {
       return Math.random().toString(36).substr(2, 9);
     }
@@ -60,10 +57,10 @@ class ProductManager {
   // Crear una instancia de ProductManager
   const productManager = new ProductManager();
   
-  // Obtener productos (debería devolver [])
+  //1ro Obtener productos (debería devolver [])
   console.log(productManager.getProducts());
   
-  // Agregar un producto
+  //2do Agregar varios productos
   const productId = productManager.addProduct({
     title: 'producto prueba',
     description: 'Este es un producto prueba',
@@ -84,7 +81,7 @@ class ProductManager {
   // Obtener productos (debería devolver el producto recién agregado)
   console.log(productManager.getProducts());
   
-  // 2 Agregar un producto
+  // 3ro Agregar un producto CODE REPETIDO => RTA mensaje de error
   const productId3 = productManager.addProduct({
     title: 'producto prueba',
     description: 'Este es un producto prueba',
