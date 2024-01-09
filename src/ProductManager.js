@@ -125,10 +125,40 @@ class ProductManager {
         return Math.random().toString(36).substr(2, 9);
     }
 }
+module.exports = ProductManager;
 
 // ----------- prueba --------------
+ /* (async () => {
+    const productManager = new ProductManager();
 
-(async () => {
+    
+    let productId; //necesito que este afuera para poder tomarlo luego y usar en search
+    let productId2;
+    //TEST ADD PRODUTC OK
+    try{
+        productId = await productManager.addProduct({
+            title: 'TV 4k',
+            description: 'TV 4k led 46 pulgadas',
+            price: 1500,
+            thumbnail: 'Sin imagen',
+            code: 'abc000',
+            stock: 25,
+        });
+        productId2 = await productManager.addProduct({
+            title: 'TV 2k',
+            description: 'TV 2k led 36 pulgadas',
+            price: 500,
+            thumbnail: 'Sin imagen',
+            code: 'abc999',
+            stock: 5,
+        });
+        console.log('cargue');
+    }catch(error){
+        console.error(error.message)
+    }
+})();  */
+
+/* (async () => {
     const productManager = new ProductManager();
 
     console.log("ORIGINAL = ", await productManager.getProducts());
@@ -243,4 +273,4 @@ class ProductManager {
       } catch (error) {
         console.error(error.message);
       }
-})();
+})(); */
