@@ -115,5 +115,14 @@
     "thumbnail": "Sin imagen",
     "code": "a12",
     "stock": 2
+  },
+  {
+    "id": "13",
+    "title": "TV 10k",
+    "description": "TV 10k led 100 pulgadas",
+    "price": 11500,
+    "thumbnail": "Sin imagen",
+    "code": "a13",
+    "stock": 1
   }
 ]
