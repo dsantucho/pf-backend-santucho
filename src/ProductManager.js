@@ -1,11 +1,10 @@
 //clase “ProductManager” que gestione un conjunto de productos.
-
 const fs = require('fs').promises;
 
 class ProductManager {
 
     constructor() {
-        this.filePath = 'fileSystem.json';
+        this.filePath = './src/fileSystem.json';
         this.products = [];
         this.init(); // me tengo que asegurar que se inicie para poder leer del archivo 
     }
