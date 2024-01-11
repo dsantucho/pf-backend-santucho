@@ -51,6 +51,7 @@ app.listen(PORT, () => {
 })
 //----- Tests -----
 /* 
+Test 0 - http://localhost:8080/ Server Express arriba mensaje
 Test1 -  http://localhost:8080/products sin query, eso debe devolver todos los 10 productos.
 Test2 -  http://localhost:8080/products?limit=5 , eso debe devolver sólo los primeros 5 de los 10 productos.
 Test3 -  http://localhost:8080/products/2, eso debe devolver sólo el producto con id=2.
