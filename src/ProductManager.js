@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 class ProductManager {
 
     constructor() {
-        this.filePath = './src/fileSystem.json';
+        this.filePath = './src/products.json';
         this.products = [];
         this.init(); // me tengo que asegurar que se inicie para poder leer del archivo 
     }
@@ -45,7 +45,20 @@ class ProductManager {
         return await this.loadProducts();
     }
     //ADD producto
-    async addProduct({ title, description, price, thumbnail, code, stock }) {
+    async addProduct({
+        title,
+        description,
+        price,
+        code,
+        stock,
+        category,
+        thumbnails,
+    }) {
+
+        // Validar que todos los campos obligatorios estén presentes
+        if (!title || !description || !price || !code || !stock || !category) {
+            return console.log('Error: Todos los campos son obligatorios, excepto thumbnails');
+        }
         // Verificar si el CODE ya existe. It returns true if, in the array, it finds an element for which the provided function returns true; otherwise it returns false. It doesn't modify the array.
         const codeExists = this.products.some((product) => product.code === code);
         if (codeExists) {
@@ -61,9 +74,12 @@ class ProductManager {
             title,
             description,
             price,
-            thumbnail,
             code,
             stock,
+            status: true, // Añadir campo status con valor true por defecto
+            category,
+            thumbnails: thumbnails || [], // Añadir campo thumbnails con valor por defecto []
+
         };
 
         // Agregar el producto al array de productos
@@ -103,21 +119,23 @@ class ProductManager {
         };
 
         await this.saveProducts();
+        return id;
     }
 
     async deleteProduct(id) {
         const products = await this.loadProducts();
         const index = products.findIndex((p) => p.id === id);
-      
+
         if (index === -1) {
-          throw new Error('Error al deleteProduct: Producto no encontrado');
+            throw new Error('Error al deleteProduct: Producto no encontrado');
         }
-      
+
         // Eliminar el producto del array desde el index elimina 1 
         this.products.splice(index, 1);
-      
+
         await this.saveProducts();
-      }
+        return id;
+    }
 
     //TODO: Cambiar el deprecado. Función para generar un id único  
     generateUniqueId() {
@@ -127,34 +145,34 @@ class ProductManager {
 module.exports = ProductManager;
 
 // ----------- prueba --------------
- /* (async () => {
-    const productManager = new ProductManager();
+/* (async () => {
+   const productManager = new ProductManager();
 
-    
-    let productId; //necesito que este afuera para poder tomarlo luego y usar en search
-    let productId2;
-    //TEST ADD PRODUTC OK
-    try{
-        productId = await productManager.addProduct({
-            title: 'TV 4k',
-            description: 'TV 4k led 46 pulgadas',
-            price: 1500,
-            thumbnail: 'Sin imagen',
-            code: 'abc000',
-            stock: 25,
-        });
-        productId2 = await productManager.addProduct({
-            title: 'TV 2k',
-            description: 'TV 2k led 36 pulgadas',
-            price: 500,
-            thumbnail: 'Sin imagen',
-            code: 'abc999',
-            stock: 5,
-        });
-        console.log('cargue');
-    }catch(error){
-        console.error(error.message)
-    }
+   
+   let productId; //necesito que este afuera para poder tomarlo luego y usar en search
+   let productId2;
+   //TEST ADD PRODUTC OK
+   try{
+       productId = await productManager.addProduct({
+           title: 'TV 4k',
+           description: 'TV 4k led 46 pulgadas',
+           price: 1500,
+           thumbnail: 'Sin imagen',
+           code: 'abc000',
+           stock: 25,
+       });
+       productId2 = await productManager.addProduct({
+           title: 'TV 2k',
+           description: 'TV 2k led 36 pulgadas',
+           price: 500,
+           thumbnail: 'Sin imagen',
+           code: 'abc999',
+           stock: 5,
+       });
+       console.log('cargue');
+   }catch(error){
+       console.error(error.message)
+   }
 })();  */
 
 /* (async () => {
