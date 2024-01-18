@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1"
   },
   "scripts": {
     "start": "nodemon app.js"
   },
-  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "description": "Backend",
   "main": "./src/App.js",
-  "devDependencies": {},
   "keywords": [],
   "author": "",
   "license": "ISC"
