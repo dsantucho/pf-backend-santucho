@@ -124,5 +124,16 @@
     "thumbnail": "Sin imagen",
     "code": "a13",
     "stock": 1
+  },
+  {
+    "id": "bnfxahs0k",
+    "title": "Macbook Pro",
+    "description": "Mac 16 pulgadas ",
+    "price": "500000",
+    "code": "MAC1",
+    "stock": "3",
+    "status": true,
+    "category": "Computadoras",
+    "thumbnails": []
   }
 ]
