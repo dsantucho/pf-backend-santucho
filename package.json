@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1"
+    "express-handlebars": "^7.1.2",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.4"
   },
   "scripts": {
     "start": "nodemon app.js"
@@ -13,5 +15,8 @@
   "main": "./src/App.js",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
 }
