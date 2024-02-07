@@ -1,5 +1,6 @@
 // -------- Servidor Express ---------
 const express = require("express");
+const DataBase = require("./dao/db/index.js")
 const handlebars = require("express-handlebars");
 const { Server } = require("socket.io");
 const routerProd = require("./routes/product.routes.js");
@@ -8,7 +9,8 @@ const uiRouter = require("./routes/app.routes.js")
 const app = express() // creo la app
 const http = require('http');
 const server = http.createServer(app);
-const ProductManager = require("./ProductManager.js");
+//const ProductManager = require("./dao/FileSystem/ProductManager.js");
+const ProductManager = require ("./ProductManager.js")
 
 //Socket
 const io = new Server(server);
@@ -61,4 +63,6 @@ io.on('connection', async (socket) => {
 
 server.listen(PORT, () => {
   console.log("Puerto arriba en consola: ", PORT);
+  //ON DATABASE
+  DataBase.connect()
 })

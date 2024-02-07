@@ -1,13 +1,14 @@
 const ProductManager = require("../ProductManager.js");
 const express = require('express')
+//BD
+const Products = require('../dao/db/models/product.model.js')
 
 const { Router  } = express
 
 const routerProd = new Router()
 const product = new ProductManager(); //instancio productManager
 
-//CRUD de productos 
-
+//CRUD de productos
 //La ruta raíz GET / deberá listar todos los productos de la base. (Incluyendo la limitación ?limit del desafío anterior
 routerProd.get('/',async(req,res)=>{
     try {
@@ -47,17 +48,9 @@ routerProd.get('/:pid', async (req, res)=>{
 })
 
 /* La ruta raíz POST / deberá agregar un nuevo producto con los campos:
-id: Number/String (A tu elección, el id NO se manda desde body, se autogenera como lo hemos visto desde los primeros entregables, asegurando que NUNCA se repetirán los ids en el archivo.
-title:String,
-description:String
-code:String
-price:Number
-status:Boolean =>true por defecto
-stock:Number
-category:String
-thumbnails:Array de Strings que contenga las rutas donde están almacenadas las imágenes referentes a dicho producto
-Todos los campos son obligatorios, a excepción de thumbnails
+
  */
+//DONE
 routerProd.post('/', async (req, res)=>{
     const conf = await product.addProduct(req.body);
     if (conf){
@@ -68,10 +61,11 @@ routerProd.post('/', async (req, res)=>{
 
 })
 
-//La ruta PUT /:pid deberá tomar un producto y actualizarlo por los campos enviados desde body. NUNCA se debe actualizar o eliminar el id al momento de hacer dicha actualización.
+//DONE La ruta PUT /:pid deberá tomar un producto y actualizarlo por los campos enviados desde body. NUNCA se debe actualizar o eliminar el id al momento de hacer dicha actualización.
 routerProd.put('/:pid', async (req, res)=>{
-    const productId = req.params.pid;
-    const conf = await product.updateProduct(productId,req.body);
+    const productId = req.params.pid; //tomo el id
+    const dataReplace = req.body //data a hacer update
+    const conf = await product.updateProduct({_id:productId},dataReplace);
     console.log(conf)
     if (conf){
         res.status(200).send("Producto actualizado OK")
@@ -81,11 +75,12 @@ routerProd.put('/:pid', async (req, res)=>{
 
 })
 
-//La ruta DELETE /:pid deberá eliminar el producto con el pid indicado. 
+//DONE La ruta DELETE /:pid deberá eliminar el producto con el pid indicado. 
 routerProd.delete('/:pid', async (req, res)=>{
     const productId = req.params.pid;
-    const conf = await product.deleteProduct(productId);
-    if (conf){
+    const conf = await product.deleteProduct({_id:productId});
+    console.log(conf)
+    if (conf.deletedCount != 0){
         res.status(200).send("Producto eliminado")
     }else{
         res.status(404).send("Producto no encontrado")

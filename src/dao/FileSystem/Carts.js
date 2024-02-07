@@ -3,7 +3,7 @@ const ProductManager = require("./ProductManager.js")
 
 class Carts {
     constructor() {
-        this.filePath = './src/carts.json';
+        this.filePath = './src/dao/carts.json';
         this.carts = [];
         this.init();
     }

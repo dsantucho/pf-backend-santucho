@@ -1,11 +1,29 @@
 const express = require('express');
-const Carts = require('../Carts.js')
+const Carts = require('../dao/FileSystem/Carts.js');
+//bd
+const CartsBd = require('../dao/db/models/cart.model.js')
 
 const { Router } = express
 
 const routerCart = new Router()
 const cart = new Carts();
+// -------------- CON BD ---------------------
+//POST
+routerCart.post('/bd/addCart', async (req, res) => {
+    try {
+        const cartId = await CartsBd.create(red.body);
+        res.status(201).send({
+            msj:'Cart Creada',
+            data:cartId
+        })
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
+
+
+// -------------SIN BD----------------------
 // Ruta para crear un nuevo carrito
 routerCart.post('/', async (req, res) => {
     try {
