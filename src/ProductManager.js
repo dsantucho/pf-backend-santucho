@@ -42,7 +42,7 @@ class ProductManager {
     async updateProduct(id, updatedFields) {
         try{
             const result = await Products.updateOne(id,updatedFields)
-            return result
+            return await this.getProductById(id);
         }catch(err){
             return err
         }

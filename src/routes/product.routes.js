@@ -52,11 +52,11 @@ routerProd.get('/:pid', async (req, res)=>{
  */
 //DONE
 routerProd.post('/', async (req, res)=>{
-    const conf = await product.addProduct(req.body);
-    if (conf){
-        res.status(201).send("Producto Creado")
-    }else{
-        res.status(400).send("Producto ya existente y/o  Todos los campos son obligatorios, excepto thumbnails")
+    try{
+        const conf = await product.addProduct(req.body);
+        res.status(201).json(conf);
+    }catch (err){
+        return res.status(500).json({ error: error.message });
     }
 
 })
@@ -65,25 +65,26 @@ routerProd.post('/', async (req, res)=>{
 routerProd.put('/:pid', async (req, res)=>{
     const productId = req.params.pid; //tomo el id
     const dataReplace = req.body //data a hacer update
-    const conf = await product.updateProduct({_id:productId},dataReplace);
-    console.log(conf)
-    if (conf){
-        res.status(200).send("Producto actualizado OK")
-    }else{
-        res.status(404).send("Producto no encontrado")
+    try{
+        const conf = await product.updateProduct({_id:productId},dataReplace);
+        console.log(conf)
+        res.status(200).send(conf)
+    }catch(err){
+        res.status(404).send(err)
     }
-
 })
 
 //DONE La ruta DELETE /:pid deberá eliminar el producto con el pid indicado. 
 routerProd.delete('/:pid', async (req, res)=>{
     const productId = req.params.pid;
-    const conf = await product.deleteProduct({_id:productId});
-    console.log(conf)
-    if (conf.deletedCount != 0){
-        res.status(200).send("Producto eliminado")
-    }else{
-        res.status(404).send("Producto no encontrado")
+    try{
+        const conf = await product.deleteProduct({_id:productId});
+        console.log(conf)
+        if (conf.deletedCount != 0){
+            res.status(200).send("Producto eliminado")
+        }
+    }catch (err){
+        res.status(404).send(err)
     }
 })
 
