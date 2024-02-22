@@ -2,12 +2,13 @@ const mongoose = require('mongoose');
 
 const ProductSchema = new mongoose.Schema({
     product: {
-        type: String,
-        require: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'product',
+        required: true
     },
     quantity: {
         type: Number,
-        require: true,
+        required: true,
         default:1
     }
 })
@@ -16,6 +17,10 @@ const CartSchema = new mongoose.Schema({
     products:{
         type: [ProductSchema],
     }
+})
+//midelware
+CartSchema.pre('findOne', function(){
+    this.populate('products.product')
 })
 
 const Cart = mongoose.model('carts',CartSchema);

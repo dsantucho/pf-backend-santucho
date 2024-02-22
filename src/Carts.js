@@ -31,8 +31,8 @@ class Carts {
     //obtener carrito por id
     async getCartById(cartId) {
         try{
-            let resultBD = await CartsModel.findById(cartId);
-            return resultBD
+            let resultBD = await CartsModel.findById(cartId).populate('products.product');            
+            return resultBD;
         }catch (err){
             return err
         }
@@ -49,10 +49,13 @@ class Carts {
                 throw new Error('Error: Producto no encontrado');
             }
             cart = await this.getCartById(cartId); //traigo el carrito
-            const existingProduct = cart.products.find((p) => p.product === productId);
-            if (existingProduct) {
+            //const existingProduct = cart.products.find((p) => p.product._id === productId);
+            const isProductInCart = cart.products.some(e => e.product._id.equals(productId));
+            console.log(`is product in cart: ${isProductInCart}`)
+            if (isProductInCart) {
                 // Si el producto ya existe en el carrito, incrementar la cantidad
-                cart.products.find((p) => p.product === productId).quantity += 1;
+                cart.products.find(e => e.product._id.equals(productId)).quantity += 1;
+                console.log(cart);
                 await CartsModel.updateOne({_id: cart._id}, cart);
             } else {
                 // Si el producto no existe, agregarlo al carrito con cantidad 1
@@ -65,10 +68,11 @@ class Carts {
 
 
         }catch(err){
+            console.log(err);
             return err
         }
 
-        return cart;
+        return await this.getCartById(cartId);
     }
 
 }
