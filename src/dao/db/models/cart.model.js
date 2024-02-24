@@ -22,6 +22,8 @@ const CartSchema = new mongoose.Schema({
 CartSchema.pre('findOne', function(){
     this.populate('products.product')
 })
-
+CartSchema.pre('find', function(){
+    this.populate('products.product')
+})
 const Cart = mongoose.model('carts',CartSchema);
 module.exports = Cart;
