@@ -18,22 +18,21 @@ routerProd.get('/', async (req, res) => {
         const limitQuery = parseInt(req.query.limit, 10) || 10;
         const pageQuery = parseInt(req.query.page, 10) || 1;
         const sortQuery = req.query.sort || 'asc';
-        const categoryQuery = req.query.category || undefined;
+        const categoryQuery = req.query.category || '';
         const statusQuery = req.query.status || true;
 
         const query = {
-            status: statusQuery,
             ...(categoryQuery ? { category: categoryQuery } : {}),
           };
 
         let options = {
+            status: statusQuery,
             sort: { price: sortQuery },
             limit:limitQuery, 
             page:pageQuery 
         }
 
         let resultPaginate = await Products.paginate(query,options)
-        
         res.json({
             status: 'success',
             payload: resultPaginate.docs,
@@ -44,8 +43,9 @@ routerProd.get('/', async (req, res) => {
             hasPrevPage: resultPaginate.hasPrevPage,
             hasNextPage: resultPaginate.hasNextPage,
             //esto no esta funcionando bien
-            prevLink: resultPaginate.prevPage ? `/api/products?page=${resultPaginate.prevPage}&limit=${limitQuery}&sort=${sortQuery}&${query ? { category: categoryQuery } : ''}&status=${statusQuery}` : null,
-            nextLink: resultPaginate.nextPage ? `/api/products?page=${resultPaginate.nextPage}&limit=${limitQuery}&sort=${sortQuery}&${query ? { category: categoryQuery } : ''}&status=${statusQuery}` : null,
+    
+            prevLink: resultPaginate.prevPage ? `/api/products?page=${resultPaginate.prevPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery }` : null,
+            nextLink: resultPaginate.nextPage ? `/api/products?page=${resultPaginate.nextPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery }` : null,
             
             totalItems: resultPaginate.totalDocs,
             currentPage: resultPaginate.page,   
