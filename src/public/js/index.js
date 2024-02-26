@@ -16,9 +16,13 @@ function render(data) {
             <p class="text-gray-700 text-base">
                 <strong>Precio:</strong> $${elem.price}<br>
                 <strong>Categoría:</strong> ${elem.category}<br>
-                <strong>Stock:</strong> ${elem.stock}
+                <strong>Stock:</strong> ${elem.stock}<br>
+                <strong>ID:</strong> ${elem._id}<br>
             </p>
         </div>
+        <button onclick="addToCart('${elem._id}')" class=" text-black font-bold py-2 px-4 rounded">
+        Agregar a carrito
+        </button>
     </div>
         `)
   }).join(' ')
@@ -72,6 +76,11 @@ function updatePagination(data) {
 
   console.log(paginationLinks);
   paginationData(paginationLinks);
+}
+// Esta función manejará el evento de hacer clic en el botón "Agregar a carrito"
+function addToCart(productId) {
+  // Puedes realizar aquí la lógica para agregar el producto al carrito
+  console.log(`Producto agregado al carrito: ${productId}`);
 }
 
 //por HTTP request
