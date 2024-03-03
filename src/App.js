@@ -3,8 +3,11 @@ const express = require("express");
 const DataBase = require("./dao/db/index.js")
 const handlebars = require("express-handlebars");
 const { Server } = require("socket.io");
+const MongoStore = require ('connect-mongo');
+const session = require('express-session');
 const routerProd = require("./routes/product.routes.js");
 const routerCart = require("./routes/carts.routes.js");
+const routerAuth = require("./routes/auth.routes.js")
 const uiRouter = require("./routes/app.routes.js")
 const app = express() // creo la app
 const http = require('http');
@@ -31,9 +34,20 @@ app.set('view engine', 'handlebars')
 app.set('views', __dirname + "/views");
 console.log(__dirname)
 //Routes
+app.use(session({
+  store: MongoStore.create({
+    mongoUrl: 'mongodb+srv://dsantucho:coder123456@proyectofinalbk.syalrvk.mongodb.net/ecommerce',
+    //ttl: 10
+  }),
+  secret:'secretCoder',
+  resave:true,
+  saveUninitialized: true
+}))
+
 app.use('/', uiRouter) //tiene las vistas de home y realtimeProducts
 app.use('/api/products/', routerProd)
 app.use('/api/carts/', routerCart)
+app.use('/auth/',routerAuth)
 
 //InicialiCarzar el Socket en el servido
 //on prendo socket - escuchador de eventos
@@ -60,6 +74,12 @@ io.on('connection', async (socket) => {
 
 
 
+
+app.get('/sessionSet', (req,res)=>{
+  req.session.user = 'sol';
+  req.session.age = 32;
+  res.send('Session OK!')
+})
 
 server.listen(PORT, () => {
   console.log("Puerto arriba en consola: ", PORT);
