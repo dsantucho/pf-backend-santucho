@@ -9,11 +9,13 @@ const routerProd = require("./routes/product.routes.js");
 const routerCart = require("./routes/carts.routes.js");
 const routerAuth = require("./routes/auth.routes.js")
 const uiRouter = require("./routes/app.routes.js")
-const app = express() // creo la app
+const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
 //const ProductManager = require("./dao/FileSystem/ProductManager.js");
-const ProductManager = require ("./ProductManager.js")
+const ProductManager = require ("./ProductManager.js");
+const passport = require('passport');
+const initializePassport = require('./passport/passport.js')
 
 //Socket
 const io = new Server(server);
@@ -23,16 +25,16 @@ const io = new Server(server);
 const PORT = 8080 || process.env.PORT;
 
 //Public
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(__dirname + '/public'));
 //Middelwares
-app.use(express.json()) //enviar y recibir archivos JSON
-app.use(express.urlencoded({ extended: true })) //permitir extensiones en la url
+app.use(express.json()); //enviar y recibir archivos JSON
+app.use(express.urlencoded({ extended: true })); //permitir extensiones en la url
 
 //motor de plantillas
-app.engine('handlebars', handlebars.engine())
-app.set('view engine', 'handlebars')
+app.engine('handlebars', handlebars.engine());
+app.set('view engine', 'handlebars');
 app.set('views', __dirname + "/views");
-console.log(__dirname)
+console.log(__dirname);
 //Routes
 app.use(session({
   store: MongoStore.create({
@@ -42,7 +44,11 @@ app.use(session({
   secret:'secretCoder',
   resave:true,
   saveUninitialized: true
-}))
+}));
+
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', uiRouter) //tiene las vistas de home y realtimeProducts
 app.use('/api/products/', routerProd)
