@@ -3,6 +3,7 @@ const { Router } = express;
 const bcrypt = require('bcrypt');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
 const passport = require('passport');
+const userModel = require('../dao/db/models/user.model');
 
 const router = new Router();
 
@@ -58,6 +59,10 @@ router.get('/callbackGithub', passport.authenticate("github", {}), (req,res)=>{
     //res.setHeader('Content-Type','application/json');
     //res.status(200).json({payload:req.user});
     return res.redirect(`/products?username=${req.user.username}&rol=${req.user.rol}`);
+})
+router.get('/users', async (req,res)=>{
+    let allusers = await userModel.find()
+    res.send(allusers);
 })
 
 
