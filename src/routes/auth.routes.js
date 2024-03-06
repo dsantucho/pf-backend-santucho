@@ -1,5 +1,5 @@
 const express = require('express');
-const {Router} = express;
+const { Router } = express;
 const bcrypt = require('bcrypt');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
 const passport = require('passport');
@@ -7,14 +7,14 @@ const passport = require('passport');
 const router = new Router();
 
 let users = [{
-    username:'adminCoder@coder.com',
-    password:'adminCod3r123',
-    rol:'admin'
+    username: 'adminCoder@coder.com',
+    password: 'adminCod3r123',
+    rol: 'admin'
 },
 {
-    username:'test@coder.com',
-    password:'123456',
-    rol:'user'
+    username: 'test@coder.com',
+    password: '123456',
+    rol: 'user'
 }] //luego conectar con db
 
 //REGISTRO
@@ -28,12 +28,25 @@ let users = [{
 }); */
 
 router.post('/register',
-    passport.authenticate('register',{ failureRedirect: '/error'}),
-    function(req,res){
-    res.redirect('/login-view')
+    passport.authenticate('register', { failureRedirect: '/error' }),
+    function (req, res) {
+        res.redirect('/login-view')
     });
-router.get('/error', (req,res)=>{
+router.get('/error', (req, res) => {
     res.send('error registro user');
+})
+router.post('/login',
+    passport.authenticate('login', { failureRedirect: '/error' }),
+    (req, res) => {
+        console.log(req.session)
+        res.redirect(`/products?username=${req.user.username}&rol=${req.user.rol}`);
+    });
+
+router.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) res.send('error en logout')
+    })
+    res.redirect('/login-view')
 })
 
 //LOGIN
@@ -73,6 +86,6 @@ router.get('/logout', (req,res)=>{
 router.get('/users', (req,res)=>{
     res.send(users);
 }) */
- 
+
 
 module.exports = router
