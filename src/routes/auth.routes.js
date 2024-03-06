@@ -47,7 +47,19 @@ router.get('/logout', (req, res) => {
         if (err) res.send('error en logout')
     })
     res.redirect('/login-view')
+});
+
+router.get('/github', passport.authenticate("github", {}), (req,res)=>{})
+
+router.get('/callbackGithub', passport.authenticate("github", {}), (req,res)=>{
+
+    req.session.usuario=req.user
+
+    //res.setHeader('Content-Type','application/json');
+    //res.status(200).json({payload:req.user});
+    return res.redirect(`/products?username=${req.user.username}&rol=${req.user.rol}`);
 })
+
 
 //LOGIN
 /* router.post('/login', (req,res)=>{
