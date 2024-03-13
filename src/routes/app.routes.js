@@ -2,6 +2,10 @@ const express = require('express')
 const {Router} = express
 
 const router = new Router()
+const path = require('path');
+
+// Obtener la ruta absoluta del directorio actual
+const absolutePath = path.resolve(__dirname, '..', '404.html');
 
 /* function auth (req,res){
   let suma = 10
@@ -13,11 +17,13 @@ const router = new Router()
 } */
 
 
+
+
 router.get('/products', async (req, res)=>{
-  const username = req.query.username;
-  const rol = req.query.rol;
+  const email = req.query.email;
+  const role = req.query.role;
   // Renderizar la vista home.handlebars y pasarle la lista de productos
-  res.render('products',{username, rol });
+  res.render('products',{email, role });
 }) 
 router.get('/carts/:cid', async (req, res)=>{
   const cartId = req.params.cid;
@@ -39,6 +45,11 @@ router.get('/register-view', async(req,res)=>{
 })
 /* router.get('/profile-view',auth, async(req,res)=>{
   res.render('profile')
+}) */
+
+/* router.get('*', async(req,res)=>{
+  res.status(400).sendFile(absolutePath);
+  //res.sendFile(path [, options] [, fn])
 }) */
 
 module.exports = router

@@ -3,23 +3,40 @@ const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema(
     {
-        username: {
+        first_name: {
             type: String,
             require: true
+        },
+        last_name: {
+            type: String,
+            require: true
+        },
+        email: {
+            type: String,
+            unique: true, // Hace que el email sea único
+        },
+        age: {
+            type: Number
         },
         password: {
             type: String,
             //require: true
         },
-        rol: {
+        //cart:Id con referencia a Carts
+        cart: {
+            type: String
+        },
+        //role:String(default:’user’) */
+        role: {
             type: String,
             require: true,
-            enum: ['User', 'admin']
+            default: 'user',
+            enum: ['user', 'admin']
         }
     },
     {
-        timestamps:true,
-        strict:false
+        timestamps: true,
+        strict: false
     }
 );
 

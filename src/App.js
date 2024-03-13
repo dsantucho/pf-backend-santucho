@@ -8,7 +8,8 @@ const session = require('express-session');
 const routerProd = require("./routes/product.routes.js");
 const routerCart = require("./routes/carts.routes.js");
 const routerAuth = require("./routes/auth.routes.js")
-const uiRouter = require("./routes/app.routes.js")
+const uiRouter = require("./routes/app.routes.js");
+const routerSession = require("./routes/session.routes.js");
 const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
@@ -54,6 +55,7 @@ app.use('/', uiRouter) //tiene las vistas de home y realtimeProducts
 app.use('/api/products/', routerProd)
 app.use('/api/carts/', routerCart)
 app.use('/auth/',routerAuth)
+app.use('/api/session/', routerSession)
 
 //InicialiCarzar el Socket en el servido
 //on prendo socket - escuchador de eventos
