@@ -1,6 +1,6 @@
 Para inicializar 
-1- npm start => abre 8080
-2 - inicializar tailwindcss npx tailwindcss -i ./src/input.css -o ./src/public/css/output.css --watch
+1- npm start --mode dev => abre 8080
+2 - inicializar tailwindcss = npx tailwindcss -i ./src/input.css -o ./src/public/css/output.css --watch
 
 
 Link Git= https://github.com/dsantucho/pf-backend-santucho

@@ -1,32 +1,48 @@
 // -------- Servidor Express ---------
 const express = require("express");
-const DataBase = require("./dao/db/index.js")
+const DataBase = require("./src/models/db/index.js")
 const handlebars = require("express-handlebars");
 const { Server } = require("socket.io");
 const MongoStore = require ('connect-mongo');
 const session = require('express-session');
-const routerProd = require("./routes/product.routes.js");
-const routerCart = require("./routes/carts.routes.js");
-const routerAuth = require("./routes/auth.routes.js")
-const uiRouter = require("./routes/app.routes.js");
-const routerSession = require("./routes/session.routes.js");
+const routerProd = require("./src/routes/product.routes.js");
+const routerCart = require("./src/routes/carts.routes.js");
+const routerAuth = require("./src/routes/auth.routes.js")
+const uiRouter = require("./src/routes/app.routes.js");
+const routerSession = require("./src/routes/session.routes.js");
 const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
 //const ProductManager = require("./dao/FileSystem/ProductManager.js");
-const ProductManager = require ("./ProductManager.js");
+const ProductManager = require ("./src/services/ProductManager.js");
 const passport = require('passport');
-const initializePassport = require('./passport/passport.js')
+const initializePassport = require('./src/passport/passport.js');
+const { Command } = require('commander');
+const dotenv = require('dotenv');
 
 //Socket
 const io = new Server(server);
 
+// Commander
+const program = new Command();
+program
+  .option('-d', 'Variable para hacer debug', false)
+  .option('--mode <mode>', 'Modo de trabajo' , 'dev')
+  program.parse()
+// Cargar la configuración de .env.dev o .env.prod dependiendo del modo
+try {
+  console.log('que entra opts: ', program.opts().mode)
+  dotenv.config({
+    path: program.opts().mode == 'dev' ? '.env.dev' : '.env.prod'
+  });
+  console.log('Options mode: ', program.opts())
+} catch (error) {
+  console.error('Error cargando archivos .env:', error);
+}
 
-//PORT
-const PORT = 8080 || process.env.PORT;
 
 //Public
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/src/public'));
 //Middelwares
 app.use(express.json()); //enviar y recibir archivos JSON
 app.use(express.urlencoded({ extended: true })); //permitir extensiones en la url
@@ -34,8 +50,8 @@ app.use(express.urlencoded({ extended: true })); //permitir extensiones en la ur
 //motor de plantillas
 app.engine('handlebars', handlebars.engine());
 app.set('view engine', 'handlebars');
-app.set('views', __dirname + "/views");
-console.log(__dirname);
+app.set('views', __dirname + "/src/views");
+
 //Routes
 app.use(session({
   store: MongoStore.create({
@@ -80,17 +96,15 @@ io.on('connection', async (socket) => {
 
 })
 
-
-
-
 app.get('/sessionSet', (req,res)=>{
   req.session.user = 'sol';
   req.session.age = 32;
   res.send('Session OK!')
 })
 
-server.listen(PORT, () => {
-  console.log("Puerto arriba en consola: ", PORT);
+console.log(process.env.PORT)
+server.listen(process.env.PORT, () => {
+  console.log("Server listen: ",process.env.PORT);
   //ON DATABASE
   DataBase.connect()
 })
