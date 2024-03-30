@@ -31,9 +31,9 @@ router.get('/login-view', async(req,res)=>{
 router.get('/register-view', async(req,res)=>{
   res.render('register')
 })
-/* router.get('/profile-view',auth, async(req,res)=>{
-  res.render('profile')
-}) */
+router.get('/profile-view', async(req,res)=>{
+  res.render('profile', {email: req.user.email})
+})
 
 /* router.get('*', async(req,res)=>{
   res.status(400).sendFile(absolutePath);

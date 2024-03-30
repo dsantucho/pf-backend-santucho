@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema(
             type: String,
             //require: true
         },
-        //cart:Id con referencia a Cartskk
+        //cart:Id con referencia a Carts
         cart: {  
             type: mongoose.Schema.Types.ObjectId,
             ref: 'carts',
