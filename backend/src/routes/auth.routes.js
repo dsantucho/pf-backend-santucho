@@ -3,30 +3,10 @@ const { Router } = express;
 const bcrypt = require('bcrypt');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
 const passport = require('passport');
-const userModel = require('../dao/db/models/user.model');
+const userModel = require('../models/db/models/user.model');
 
 const router = new Router();
 
-let users = [{
-    username: 'adminCoder@coder.com',
-    password: 'adminCod3r123',
-    rol: 'admin'
-},
-{
-    username: 'test@coder.com',
-    password: '123456',
-    rol: 'user'
-}] //luego conectar con db
-
-//REGISTRO
-/* router.post('/register', (req,res)=>{
-    let newUser=req.body;
-    newUser.password = createHash(newUser.password);
-    newUser.id=Math.random();
-    users.push(newUser);
-    //redirect to login
-    res.redirect('/login-view')
-}); */
 
 router.post('/register',
     passport.authenticate('register', { failureRedirect: '/error' }),
@@ -66,11 +46,6 @@ router.get('/users', async (req,res)=>{
     res.send(allusers);
 })
 
-
-
-/* router.get('/users', (req,res)=>{
-    res.send(users);
-})  */
 
 
 module.exports = router

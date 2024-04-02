@@ -23,10 +23,11 @@ const UserSchema = new mongoose.Schema(
             //require: true
         },
         //cart:Id con referencia a Carts
-        cart: {
-            type: String
+        cart: {  
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'carts',
+            required: true 
         },
-        //role:String(default:’user’) */
         role: {
             type: String,
             require: true,

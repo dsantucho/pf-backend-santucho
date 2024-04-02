@@ -1,7 +1,7 @@
 const fs = require('fs').promises;
 const ProductManager = require("./ProductManager.js")
 //BD
-const CartsModel = require("./dao/db/models/cart.model.js")
+const CartsModel = require("../models/db/models/cart.model.js")
 
 class Carts {
     constructor() {

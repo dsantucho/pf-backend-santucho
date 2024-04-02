@@ -1,7 +1,7 @@
 //clase “ProductManager” que gestione un conjunto de productos.
 const fs = require('fs').promises;
 //BD
-const Products = require('./dao/db/models/product.model')
+const Products = require('../models/db/models/product.model')
 
 class ProductManager {
 

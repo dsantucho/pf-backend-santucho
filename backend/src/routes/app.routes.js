@@ -7,18 +7,6 @@ const path = require('path');
 // Obtener la ruta absoluta del directorio actual
 const absolutePath = path.resolve(__dirname, '..', '404.html');
 
-/* function auth (req,res){
-  let suma = 10
-  if (suma ==10){
-    next()
-  }else{
-    res.send ('No tiene acceso')
-  }
-} */
-
-
-
-
 router.get('/products', async (req, res)=>{
   const email = req.query.email;
   const role = req.query.role;
@@ -43,9 +31,9 @@ router.get('/login-view', async(req,res)=>{
 router.get('/register-view', async(req,res)=>{
   res.render('register')
 })
-/* router.get('/profile-view',auth, async(req,res)=>{
-  res.render('profile')
-}) */
+router.get('/profile-view', async(req,res)=>{
+  res.render('profile', {email: req.user.email})
+})
 
 /* router.get('*', async(req,res)=>{
   res.status(400).sendFile(absolutePath);

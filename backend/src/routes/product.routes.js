@@ -1,8 +1,8 @@
-const ProductManager = require("../ProductManager.js");
+const ProductManager = require("../services/ProductManager.js");
 const express = require('express');
 const mongoosePaginate = require('mongoose-paginate-v2');
 //BD
-const Products = require('../dao/db/models/product.model.js')
+const Products = require('../models/db/models/product.model.js')
 
 const { Router } = express
 
