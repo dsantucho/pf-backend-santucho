@@ -16,7 +16,14 @@ routerSession.get('/current', async (req, res) => {
         let user = req.user
         if(sessionUser._id == user._id){
             // Devuelve el usuario actual en la respuesta
-            res.json(user);
+            res.json({
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "email": user.email,
+                "age": user.age,
+                "cart": user.cart,
+                "role": user.role
+            });
         }else{
             // Si el usuario no se encuentra en la sesión, devuelve un error
             return res.status(404).json({ message: 'Usuario no encontrado en la sesión' });

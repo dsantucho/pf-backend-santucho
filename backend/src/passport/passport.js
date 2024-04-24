@@ -1,9 +1,9 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const github = require('passport-github2')
-const userModel = require('../models/db/models/user.model');
+const userModel = require('../modules/user.model');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
-const Cart = require ('../services/Carts');
+const Cart = require ('../dao/CartDao');
 
 const initializePassport = () => {
 

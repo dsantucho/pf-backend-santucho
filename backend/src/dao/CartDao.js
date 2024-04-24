@@ -1,7 +1,7 @@
 const fs = require('fs').promises;
-const ProductManager = require("./ProductManager.js")
+const ProductManager = require('./ProductDao.js')
 //BD
-const CartsModel = require("../models/db/models/cart.model.js")
+const CartsModel = require("../modules/cart.model.js")
 
 class Carts {
     constructor() {
@@ -20,7 +20,6 @@ class Carts {
 
     //crear carrito
     async createCart() {
-        console.log('reached cart');
         try {
             let createCart = await CartsModel.create({});
             return createCart;
@@ -28,6 +27,15 @@ class Carts {
             return err;
         }
     }
+    //delete cart by id
+    async deleteCartById(id) {
+        try {
+            return await CartsModel.findByIdAndDelete({[this.ID_FIELD]: id})
+        } catch (error) {
+            return err;
+        }
+    }
+
     //obtener carrito por id
     async getCartById(cartId) {
         try {
@@ -124,21 +132,28 @@ class Carts {
         }
     }
     //PUT api/carts/:cid/products/:pid deberá poder actualizar SÓLO la cantidad de ejemplares del producto por cualquier cantidad pasada desde req.body
-  // Actualizar la cantidad de ejemplares de un producto en el carrito
-  async updateProductQuantity(cartId, productId, newQuantity) {
-    try {
-      const cart = await this.getCartById(cartId);
-      const productIndex = cart.products.findIndex((p) => p.product._id.equals(productId));
+    // Actualizar la cantidad de ejemplares de un producto en el carrito
+    async updateProductQuantity(cartId, productId, newQuantity) {
+        try {
+        const cart = await this.getCartById(cartId);
+        const productIndex = cart.products.findIndex((p) => p.product._id.equals(productId));
 
-      if (productIndex !== -1) {
-        cart.products[productIndex].quantity = newQuantity;
-        await CartsModel.updateOne({ _id: cart._id }, cart);
-      }
-      return await this.getCartById(cartId);
-    } catch (err) {
-      console.log(err);
-      return err;
+        if (productIndex !== -1) {
+            cart.products[productIndex].quantity = newQuantity;
+            await CartsModel.updateOne({ _id: cart._id }, cart);
+        }
+        return await this.getCartById(cartId);
+        } catch (err) {
+        console.log(err);
+        return err;
+        }
     }
-  }
+    async getAllProductsFromCart(id) {
+        try {
+            return await CartsModel.findById(id).populate('products').select({products: 1, _id:0});
+        } catch (error) {
+            return err;
+        }
+    }
 }
 module.exports = Carts;

@@ -25,7 +25,7 @@ const ProductSchema = new mongoose.Schema({
     stock: {
         type: String,
         require: true,
-        default:5
+        default:500
     },
     status: {
         type: Boolean,

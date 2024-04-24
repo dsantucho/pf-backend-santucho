@@ -1,7 +1,9 @@
+//import {productModel} from '../modules/product.model.js'
+
 //clase “ProductManager” que gestione un conjunto de productos.
 const fs = require('fs').promises;
 //BD
-const Products = require('../models/db/models/product.model')
+const Products = require('../modules/product.model.js')
 
 class ProductManager {
 

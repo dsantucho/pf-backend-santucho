@@ -3,7 +3,7 @@ const { Router } = express;
 const bcrypt = require('bcrypt');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
 const passport = require('passport');
-const userModel = require('../models/db/models/user.model');
+const userModel = require('../modules/user.model');
 
 const router = new Router();
 
@@ -21,7 +21,7 @@ router.post('/login',
     (req, res) => {
         req.session.usuario=req.user
         console.log(req.user.email)
-        res.redirect(`/products?email=${req.user.email}&role=${req.user.role}`);
+        res.redirect(`/products`);
     });
 
 router.get('/logout', (req, res) => {

@@ -1,12 +1,13 @@
 const express = require('express');
-const Carts = require('../services/Carts.js');
+//const Carts = require('../services/Carts.js');
+const CartsDao = require ('../dao/CartDao.js')
 //bd
 //const CartsBd = require('../dao/db/models/cart.model.js')
 
 const { Router } = express
 
 const routerCart = new Router()
-const cart = new Carts();
+const cart = new CartsDao();
 
 // Ruta para crear un nuevo carrito
 routerCart.post('/', async (req, res) => {

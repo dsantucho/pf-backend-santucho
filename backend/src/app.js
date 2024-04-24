@@ -1,24 +1,47 @@
 // -------- Servidor Express ---------
 const express = require("express");
-const DataBase = require("./src/models/db/index.js")
+//const DataBase = require("./dao/db/index.js")
+const DataBase = require('./config/db.js')
 const handlebars = require("express-handlebars");
 const { Server } = require("socket.io");
 const MongoStore = require ('connect-mongo');
 const session = require('express-session');
-const routerProd = require("./src/routes/product.routes.js");
-const routerCart = require("./src/routes/carts.routes.js");
-const routerAuth = require("./src/routes/auth.routes.js")
-const uiRouter = require("./src/routes/app.routes.js");
-const routerSession = require("./src/routes/session.routes.js");
+const routerProd = require("./routes/product.routes.js");
+const routerCart = require("./routes/carts.routes.js");
+const routerAuth = require("./routes/auth.routes.js")
+const uiRouter = require("./routes/app.routes.js");
+const routerSession = require("./routes/session.routes.js");
 const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
 //const ProductManager = require("./dao/FileSystem/ProductManager.js");qßweqweßß
-const ProductManager = require ("./src/services/ProductManager.js");
+const ProductManager = require ('./dao/ProductDao.js');
 const passport = require('passport');
-const initializePassport = require('./src/passport/passport.js');
+const initializePassport = require('./passport/passport.js');
 const { Command } = require('commander');
 const dotenv = require('dotenv');
+//const cors = require("cors");
+
+//cors 
+// 1 origin
+/* const corsOptions = {
+  origin: "http://localhost:8080/",
+  methods: ['GET', 'POST', 'PUT'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+} */
+// many origins 
+/* const whiteList = ['http://localhost:8080/', 'http://localhost:8080/', 'http://localhost:8080/'];
+const corsOptions = {
+  origin: function (origin, callback){
+    if(whiteList.indexOf(origin) !== -1){
+      callback(null, true) //exite dentro de la whitelist
+    }else{
+      callback( new Error ('Acceso no autorizado por CORS'))
+    }
+  },
+  methods: ['GET', 'POST', 'PUT'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+} */
 
 //Socket
 const io = new Server(server);
@@ -40,9 +63,10 @@ try {
   console.error('Error cargando archivos .env:', error);
 }
 
-
+//cors
+//app.use(cors(corsOptions))
 //Public
-app.use(express.static(__dirname + '/src/public'));
+app.use(express.static(__dirname + '/public'));
 //Middelwares
 app.use(express.json()); //enviar y recibir archivos JSON
 app.use(express.urlencoded({ extended: true })); //permitir extensiones en la url
@@ -50,7 +74,7 @@ app.use(express.urlencoded({ extended: true })); //permitir extensiones en la ur
 //motor de plantillas
 app.engine('handlebars', handlebars.engine());
 app.set('view engine', 'handlebars');
-app.set('views', __dirname + "/src/views");
+app.set('views', __dirname + "/views");
 
 //Routes
 app.use(session({
@@ -75,7 +99,7 @@ app.use('/api/session/', routerSession)
 
 //InicialiCarzar el Socket en el servido
 //on prendo socket - escuchador de eventos
-io.on('connection', async (socket) => {
+/* io.on('connection', async (socket) => {
   // aqui se hace toda la magia, si conecta a mi socket se hablan
   console.log('user conectado');
 
@@ -94,7 +118,7 @@ io.on('connection', async (socket) => {
     console.log('dato nuevo: ',data) // consola de servidor: que dato agrego
   })
 
-})
+}) */
 
 app.get('/sessionSet', (req,res)=>{
   req.session.user = 'sol';

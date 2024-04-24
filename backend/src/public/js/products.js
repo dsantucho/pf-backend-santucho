@@ -78,9 +78,28 @@ function updatePagination(data) {
   paginationData(paginationLinks);
 }
 // Esta función manejará el evento de hacer clic en el botón "Agregar a carrito"
-function addToCart(productId) {
+async function addToCart(productId) {
   // Puedes realizar aquí la lógica para agregar el producto al carrito
   console.log(`Producto agregado al carrito: ${productId}`);
+  try {
+    const response = await fetch(`http://localhost:8080/api/session/current`);
+    const userData = await response.json();
+    const cartId = userData.cart; // Suponiendo que el ID del carrito está en userData.cart
+    const addToCartResponse = await fetch(`http://localhost:8080/api/carts/${cartId}/product/${productId}`, {
+        method: 'POST'
+    });
+    const result = await addToCartResponse.json();
+    console.log(result.message);
+} catch (error) {
+    console.error('Error al agregar producto al carrito:', error);
+}
+}
+function infoBienvenida (data){
+  document.getElementById('infoBienvenida').innerHTML = 
+     (`
+      <h1 id="infoBienvenido" class="text-2xl tracking-wide font-sans">Bienvenido, ${data.email}!</h1>
+      <p id="infoRol" class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
+    `) 
 }
 
 //por HTTP request
@@ -93,6 +112,12 @@ fetch('http://localhost:8080/api/products/?limit=4&page=1').then((response) => {
   });
   console.log('Se envio la data desde fetch');
 });
+
+fetch ('http://localhost:8080/api/session/current').then((response)=>{
+  response.json().then(data => {
+    infoBienvenida(data)
+  });
+})
 
 
 
