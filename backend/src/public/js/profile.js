@@ -6,6 +6,7 @@ function bannerPersonalData (data){
        <p  class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
        <p class = "text-2xl tracking-wide font-sans">Mi Carrito = ${data.cart} </p>
        <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="/auth/logout">Logout</a>
+       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="http://localhost:8080/products">Ir a Productos</a>
 
       `) 
   }
@@ -46,7 +47,7 @@ function bannerPersonalData (data){
             html = `
                 <div class="">
                 <button onclick="realizarCompra()" class=" my-4 py-2 px-4 rounded bg-green-500 text-white font-bold">Comprar</button>
-                <button onclick="window.location.href = 'http://localhost:8080/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
+                <button onclick="explorarProductos()" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
                 </div>
                 ${html}`;
       
@@ -54,7 +55,6 @@ function bannerPersonalData (data){
     }
 }
 
-  
 // Obtener información del usuario actual
 fetch('http://localhost:8080/api/session/current')
     .then((response) => {
@@ -77,9 +77,13 @@ fetch('http://localhost:8080/api/session/current')
         console.error('Error al obtener información del usuario actual:', error);
     });
 
+    function explorarProductos() {
+        // Redirigir a la página de productos
+        window.location.href = 'http://localhost:8080/products';
+    }
+
     function realizarCompra() {
         // Obtener la ID del carrito
-        console.log('DAN : entro a realizarCompra()')
         fetch('http://localhost:8080/api/session/current')
             .then(response => response.json())
             .then(data => {
@@ -93,8 +97,8 @@ fetch('http://localhost:8080/api/session/current')
                 .then(data => {
                     // Manejar la respuesta del servidor (puede mostrar un mensaje de éxito o error)
                     console.log(data);
-                    // Refrescar la página u otra acción después de la compra
-                    window.location.reload();
+                    // Mostrar el mensaje de banner y la lista de productos no comprados
+                    mostrarMensajeCompra(data);
                 })
                 .catch(error => {
                     console.error('Error al realizar la compra:', error);
@@ -103,6 +107,46 @@ fetch('http://localhost:8080/api/session/current')
             .catch(error => {
                 console.error('Error al obtener la información del usuario:', error);
             });
+    }
+
+    function mostrarMensajeCompra(data) {
+        const bannerElement = document.getElementById('bannerCompra');
+        bannerElement.innerHTML = '';
+    
+        if (data.message) {
+            // Limpiar la lista del carrito
+            const cartListElement = document.getElementById('cartList');
+            cartListElement.innerHTML = '';
+            // Mostrar el mensaje de éxito
+            bannerElement.innerHTML = `
+            <div class= " bg-slate-950 w-full container"> 
+                <h2 class=" text-3xl text-green-500">${data.message}</h2>
+                <p class=" text-2xl text-green-500"> Codigo de compra = ${data.data.code}</p>
+                <p class=" text-2xl text-green-500"> Fecha de compra = ${data.data.purchase_datetime}</p>
+                <p class=" text-2xl text-green-500"> A nombre de = ${data.data.purchaser}</p>
+                <button onclick="window.location.href = 'http://localhost:8080/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
+            </div>
+            
+            `;
+        } else if (data.error) {
+            // Mostrar el mensaje de error
+            bannerElement.innerHTML = `<h2 class="text-red-500">${data.error}</h2>`;
+        }
+    
+/*         if (data.productsNotProcessed && data.productsNotProcessed.length > 0) {
+            // Mostrar la lista de productos no comprados
+            const productListElement = document.createElement('ul');
+            productListElement.classList.add('text-red-500');
+            productListElement.innerHTML = '<h3>Productos no comprados:</h3>';
+    
+            data.productsNotProcessed.forEach(productId => {
+                const listItem = document.createElement('li');
+                listItem.textContent = productId;
+                productListElement.appendChild(listItem);
+            });
+    
+            bannerElement.appendChild(productListElement);
+        } */
     }
     
 

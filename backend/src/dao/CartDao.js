@@ -202,8 +202,6 @@ class Carts {
             // Crear el ticket
             const total = await this.getCartTotal(cartId);
             const ticketDao = new TicketDao();
-            console.log('cart: ', cart)
-            console.log('total: ', total, 'cart.email: ', email)
             const ticket = await ticketDao.createTicket(total, email);
     
             // Filtrar los productos del carrito para mantener solo aquellos que no se pudieron comprar
@@ -212,10 +210,15 @@ class Carts {
     
             if (productsNotProcessed.length > 0) {
                 // Si hay productos no procesados, retornar el arreglo con sus IDs
-                return { message: 'Compra parcialmente realizada, productos no disponibles:', productsNotProcessed };
+                return { 
+                    message: 'Compra parcialmente realizada, productos no disponibles:', 
+                    data: productsNotProcessed 
+                };
             } else {
                 // Si todos los productos se pudieron procesar, retornar un mensaje de éxito junto con el monto total de la compra
-                return { message: 'Compra realizada exitosamente, monto:', ticket };
+                return { 
+                    message: `Compra realizada exitosamente, monto: ${total}`, 
+                    data: ticket };
             }
         } catch (error) {
             return { error: error.message };

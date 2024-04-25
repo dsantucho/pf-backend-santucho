@@ -77,6 +77,11 @@ function updatePagination(data) {
   console.log(paginationLinks);
   paginationData(paginationLinks);
 }
+function irCarrito() {
+  // Redirigir a la página de productos
+  window.location.href = 'http://localhost:8080/profile-view';
+
+}
 // Esta función manejará el evento de hacer clic en el botón "Agregar a carrito"
 async function addToCart(productId) {
   // Puedes realizar aquí la lógica para agregar el producto al carrito

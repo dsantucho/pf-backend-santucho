@@ -122,7 +122,10 @@ routerCart.post('/:cid/purchase', async (req, res) => {
         }
 
         // Enviar respuesta de éxito
-        res.json({ message: purchaseResult.message });
+        res.json({ 
+            message: purchaseResult.message,
+            data: purchaseResult.data
+         });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
