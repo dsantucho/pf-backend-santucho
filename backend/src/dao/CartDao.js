@@ -2,6 +2,8 @@ const fs = require('fs').promises;
 const ProductManager = require('./ProductDao.js')
 //BD
 const CartsModel = require("../modules/cart.model.js")
+const TicketModel = require("../modules/ticket.model.js")
+const TicketDao = require("./TicketDao.js")
 
 class Carts {
     constructor() {
@@ -155,5 +157,70 @@ class Carts {
             return err;
         }
     }
+
+    async getCartTotal(cartId) {
+        const productManager = new ProductManager()
+        try {
+            const cart = await this.getCartById(cartId);
+            let total = 0;
+            for (const item of cart.products) {
+                const product = await productManager.getProductById(item.product._id);
+                total += product.price * item.quantity;
+            }
+            return total;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
+    }
+
+
+    async purchaseCart(cartId, email) {
+        try {
+            const cart = await this.getCartById(cartId);
+            if (!cart) {
+                return { error: 'Carrito no encontrado' };
+            }
+    
+            const productsNotProcessed = []; // Almacena los IDs de los productos no procesados
+    
+            for (const item of cart.products) {
+                const product = new ProductManager()
+                const productExists = await product.getProductById(item.product);
+                if (!productExists) {
+                    return { error: 'Producto no encontrado' };
+                }
+    
+                if (productExists.stock < item.quantity) {
+                    productsNotProcessed.push(item.product); // Agrega el ID del producto no procesado
+                } else {
+                    const updatedStock = productExists.stock - item.quantity;
+                    await product.updateProduct(item.product._id, { stock: updatedStock });
+                }
+            }
+    
+            // Crear el ticket
+            const total = await this.getCartTotal(cartId);
+            const ticketDao = new TicketDao();
+            console.log('cart: ', cart)
+            console.log('total: ', total, 'cart.email: ', email)
+            const ticket = await ticketDao.createTicket(total, email);
+    
+            // Filtrar los productos del carrito para mantener solo aquellos que no se pudieron comprar
+            cart.products = cart.products.filter(item => productsNotProcessed.includes(item.product.toString()));
+            await this.updateCart(cartId, cart.products);
+    
+            if (productsNotProcessed.length > 0) {
+                // Si hay productos no procesados, retornar el arreglo con sus IDs
+                return { message: 'Compra parcialmente realizada, productos no disponibles:', productsNotProcessed };
+            } else {
+                // Si todos los productos se pudieron procesar, retornar un mensaje de éxito junto con el monto total de la compra
+                return { message: 'Compra realizada exitosamente, monto:', ticket };
+            }
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+    
 }
 module.exports = Carts;

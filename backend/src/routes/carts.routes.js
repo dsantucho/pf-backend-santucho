@@ -109,4 +109,23 @@ routerCart.put('/:cid/products/:pid', async (req, res) => {
     }
 });
 
+// Ruta para finalizar el proceso de compra del carrito
+routerCart.post('/:cid/purchase', async (req, res) => {
+    const cartId = req.params.cid;
+    const userEmail = req.user.email;
+    try {
+        const purchaseResult = await cart.purchaseCart(cartId, userEmail);
+
+        if (purchaseResult.error) {
+            // Si hubo un error durante la compra, devolver el error
+            return res.status(400).json({ error: purchaseResult.error });
+        }
+
+        // Enviar respuesta de éxito
+        res.json({ message: purchaseResult.message });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = routerCart;

@@ -77,4 +77,33 @@ fetch('http://localhost:8080/api/session/current')
         console.error('Error al obtener información del usuario actual:', error);
     });
 
+    function realizarCompra() {
+        // Obtener la ID del carrito
+        console.log('DAN : entro a realizarCompra()')
+        fetch('http://localhost:8080/api/session/current')
+            .then(response => response.json())
+            .then(data => {
+                const cartId = data.cart;
+                console.log('DAN:', data)
+                // Realizar la solicitud POST al endpoint de compra del carrito
+                fetch(`http://localhost:8080/api/carts/${cartId}/purchase`, {
+                    method: 'POST',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Manejar la respuesta del servidor (puede mostrar un mensaje de éxito o error)
+                    console.log(data);
+                    // Refrescar la página u otra acción después de la compra
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error al realizar la compra:', error);
+                });
+            })
+            .catch(error => {
+                console.error('Error al obtener la información del usuario:', error);
+            });
+    }
+    
+
 
