@@ -3,6 +3,8 @@ const express = require('express');
 const mongoosePaginate = require('mongoose-paginate-v2');
 //BD
 const Products = require('../modules/product.model.js')
+//middelware
+const {isAdmin, isUser, isAuthenticated} = require('../middlewares/auth.middleware.js')
 
 const { Router } = express
 
@@ -11,7 +13,7 @@ const product = new ProductManager(); //instancio productManager
 
 //CRUD de productos
 //La ruta raíz GET / deberá listar todos los productos de la base. (Incluyendo la limitación ?limit del desafío anterior
-routerProd.get('/', async (req, res) => {
+routerProd.get('/',isAuthenticated, async (req, res) => {
     try {
         // Obtener el límite de resultados desde los query parameters
         // el 10 le indica al parseInt su base
@@ -56,7 +58,7 @@ routerProd.get('/', async (req, res) => {
 });
 
 //La ruta GET /:pid deberá traer sólo el producto con el id proporcionado
-routerProd.get('/:pid', async (req, res) => {
+routerProd.get('/:pid',isAuthenticated, async (req, res) => {
     try {
         // Obtener el product Id desde req.params
         const productId = req.params.pid;
@@ -76,7 +78,7 @@ routerProd.get('/:pid', async (req, res) => {
 
  */
 //DONE
-routerProd.post('/', async (req, res) => {
+routerProd.post('/',isAdmin, async (req, res) => {
     try {
         const conf = await product.addProduct(req.body);
         res.status(201).json(conf);
@@ -87,7 +89,7 @@ routerProd.post('/', async (req, res) => {
 })
 
 //DONE La ruta PUT /:pid deberá tomar un producto y actualizarlo por los campos enviados desde body. NUNCA se debe actualizar o eliminar el id al momento de hacer dicha actualización.
-routerProd.put('/:pid', async (req, res) => {
+routerProd.put('/:pid',isAuthenticated, async (req, res) => {
     const productId = req.params.pid; //tomo el id
     const dataReplace = req.body //data a hacer update
     try {
@@ -100,7 +102,7 @@ routerProd.put('/:pid', async (req, res) => {
 })
 
 //DONE La ruta DELETE /:pid deberá eliminar el producto con el pid indicado. 
-routerProd.delete('/:pid', async (req, res) => {
+routerProd.delete('/:pid',isAdmin, async (req, res) => {
     const productId = req.params.pid;
     try {
         const conf = await product.deleteProduct({ _id: productId });

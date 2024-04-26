@@ -70,7 +70,10 @@ app.use(express.static(__dirname + '/public'));
 //Middelwares
 app.use(express.json()); //enviar y recibir archivos JSON
 app.use(express.urlencoded({ extended: true })); //permitir extensiones en la url
-
+// Middleware para manejar la página de acceso denegado
+app.get('/access-denied', (req, res) => {
+  res.status(401).render('denied'); // Renderizar la vista 'denied.hbs'
+});
 //motor de plantillas
 app.engine('handlebars', handlebars.engine());
 app.set('view engine', 'handlebars');
