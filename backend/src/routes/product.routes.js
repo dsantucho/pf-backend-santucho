@@ -94,7 +94,7 @@ routerProd.put('/:pid',isAuthenticated, async (req, res) => {
     const dataReplace = req.body //data a hacer update
     try {
         const conf = await product.updateProduct({ _id: productId }, dataReplace);
-        console.log(conf)
+        console.log('RAUTER PUT RESPONSE: ',conf)
         res.status(200).send(conf)
     } catch (err) {
         res.status(404).send(err)

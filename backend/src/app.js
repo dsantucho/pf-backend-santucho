@@ -20,15 +20,15 @@ const passport = require('passport');
 const initializePassport = require('./passport/passport.js');
 const { Command } = require('commander');
 const dotenv = require('dotenv');
-//const cors = require("cors");
+const cors = require("cors");
 
 //cors 
 // 1 origin
-/* const corsOptions = {
+const corsOptions = {
   origin: "http://localhost:8080/",
   methods: ['GET', 'POST', 'PUT'],
   allowedHeaders: ['Content-Type', 'Authorization']
-} */
+} 
 // many origins 
 /* const whiteList = ['http://localhost:8080/', 'http://localhost:8080/', 'http://localhost:8080/'];
 const corsOptions = {
@@ -64,7 +64,7 @@ try {
 }
 
 //cors
-//app.use(cors(corsOptions))
+app.use(cors(corsOptions))
 //Public
 app.use(express.static(__dirname + '/public'));
 //Middelwares
@@ -72,7 +72,7 @@ app.use(express.json()); //enviar y recibir archivos JSON
 app.use(express.urlencoded({ extended: true })); //permitir extensiones en la url
 // Middleware para manejar la página de acceso denegado
 app.get('/access-denied', (req, res) => {
-  res.status(401).render('denied'); // Renderizar la vista 'denied.hbs'
+  res.status(401).render('./views/denied.handlebars'); // Renderizar la vista 'denied.hbs'
 });
 //motor de plantillas
 app.engine('handlebars', handlebars.engine());

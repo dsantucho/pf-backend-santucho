@@ -41,14 +41,23 @@ class ProductManager {
         }
     }
 // -- UPDATE un producto segun su ID [no se modifica] --
-    async updateProduct(id, updatedFields) {
-        try{
-            const result = await Products.updateOne(id,updatedFields)
-            return await this.getProductById(id);
-        }catch(err){
-            return err
+async updateProduct(_id, updatedFields) {
+    try {
+        const productExist =  await this.getProductById(_id)
+        console.log("PRODUCTO DAO EXISTE = ", productExist)
+        const result = await Products.updateOne(_id, updatedFields);
+        if (result.nModified === 1) {
+            // Si se modificó correctamente, devolver el producto actualizado
+            return await this.getProductById(_id);
+        } else {
+            // Si no se modificó ningún documento, devolver un mensaje de error
+            throw new Error('El producto no fue encontrado o no se modificó correctamente.');
         }
+    } catch (err) {
+        // Manejar errores de MongoDB
+        return err;
     }
+}
 // -- DELETE --
     async deleteProduct(id) {
         try{

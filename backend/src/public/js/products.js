@@ -100,10 +100,23 @@ async function addToCart(productId) {
 }
 }
 function infoBienvenida (data){
+  let isAdminButton = '';
+  if (data.role === 'admin') {
+    isAdminButton = `<div class="mt-4">
+                      <a class="font-bold py-2 px-4 rounded text-white bg-blue-600" href="/admin-view">Admin Products</a>
+                    </div>`;
+  }
   document.getElementById('infoBienvenida').innerHTML = 
      (`
       <h1 id="infoBienvenido" class="text-2xl tracking-wide font-sans">Bienvenido, ${data.email}!</h1>
       <p id="infoRol" class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
+      <div class="mt-4">
+        <a class="font-bold py-2 px-4 rounded text-white bg-red-600" href="/auth/logout">Logout</a>
+      </div>
+      <div class="mt-4">
+        <a class="font-bold py-2 px-4 rounded text-white bg-red-600" href="/profile-view">Profile</a>
+      </div>
+      ${isAdminButton}
     `) 
 }
 

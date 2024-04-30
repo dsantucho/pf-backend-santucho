@@ -6,7 +6,8 @@ const isAdmin = (req, res, next) => {
         next();
     } else {
         // El usuario no tiene permisos de administrador, devolver un error de acceso denegado
-        return res.status(403).json({ error: 'Acceso denegado. Esta ruta es solo para administradores.' });
+        //return res.status(403).json({ error: 'Acceso denegado. Esta ruta es solo para administradores.' });
+        res.status(401).render('denied');
     }
 };
 
@@ -17,7 +18,8 @@ const isUser = (req, res, next) => {
         next();
     } else {
         // El usuario no tiene permisos de administrador, devolver un error de acceso denegado
-        return res.status(403).json({ error: 'Acceso denegado. Esta ruta es solo para Users.' });
+        //return res.status(403).json({ error: 'Acceso denegado. Esta ruta es solo para Users.' });
+        res.status(401).render('denied');
     }
 };
 const isAuthenticated = (req, res, next) => {
@@ -27,7 +29,7 @@ const isAuthenticated = (req, res, next) => {
         next();
     } else {
          // El usuario no está autenticado, redirigir a la página de acceso denegado
-         res.redirect('/access-denied');
+         res.status(401).render('denied');
     }
 };
 

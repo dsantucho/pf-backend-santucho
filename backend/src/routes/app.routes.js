@@ -22,10 +22,14 @@ router.get('/carts/:cid',isAuthenticated, async (req, res)=>{
   res.render('cart',{cartId});
 }) 
 
-router.get('/realtimeProducts', async (req, res)=>{
+/* router.get('/realtimeProducts', async (req, res)=>{
   // Renderizar la vista home.handlebars y pasarle la lista de productos
   res.render('realtimeProducts',{});
-}) 
+})  */
+//admin-view
+router.get('/admin-view', isAdmin, async(req,res)=>{
+  res.render('adminView')
+})
 //login vista
 router.get('/login-view', async(req,res)=>{
   res.render('login')
