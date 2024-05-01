@@ -25,7 +25,6 @@ class Carts {
 
         } catch (error) {
             // Si el archivo no existe o hay algún otro error, se asume un array vacío.
-            console.log("el read sale por vacio []")
             this.carts = [];
             return this.carts;
         }

@@ -4,7 +4,6 @@ const routerSession = new Router()
 
 // Ruta para obtener el usuario actual
 routerSession.get('/current', async (req, res) => {
-    console.log("req.session.usuario", req.session.usuario) 
     console.log("req.user",req.user)
     try {
         // Verifica si el usuario está autenticado

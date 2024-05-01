@@ -4,9 +4,7 @@ class TicketDao {
     constructor() {}
 
     // Crear un nuevo ticket
-    async createTicket(amount, purchaser) {
-        console.log('QUE ENTRA: ', amount, purchaser)
-        
+    async createTicket(amount, purchaser) {  
         try {
             const ticket = new Ticket({
                 amount,

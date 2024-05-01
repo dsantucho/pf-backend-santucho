@@ -20,7 +20,6 @@ router.post('/login',
     passport.authenticate('login', { failureRedirect: '/error' }),
     (req, res) => {
         req.session.usuario=req.user
-        console.log(req.user.email)
         res.redirect(`/products`);
     });
 

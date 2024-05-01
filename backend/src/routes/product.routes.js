@@ -61,14 +61,10 @@ routerProd.get('/',isAuthenticated, async (req, res) => {
 
 //MOCK FAKER
 routerProd.get('/mockingproducts', async (req, res) => {
-    console.log('entre a /mock');
     try {
         const productsMock = [];
-        console.log('PRODuct vacio: ', productsMock)
         for (let i = 0; i < 100; i++) {
-            console.log('entro al for')
             const product = generateProducts(); // Genera un producto usando Faker
-            console.log('product:', product)
             productsMock.push(product); // Agrega el producto al array
         }
         res.json({ status: 'success', payload: productsMock });
@@ -114,7 +110,6 @@ routerProd.put('/:pid',isAuthenticated, async (req, res) => {
     const dataReplace = req.body //data a hacer update
     try {
         const conf = await product.updateProduct({ _id: productId }, dataReplace);
-        console.log('RAUTER PUT RESPONSE: ',conf)
         res.status(200).send(conf)
     } catch (err) {
         res.status(404).send(err)
@@ -126,7 +121,6 @@ routerProd.delete('/:pid',isAdmin, async (req, res) => {
     const productId = req.params.pid;
     try {
         const conf = await product.deleteProduct({ _id: productId });
-        console.log(conf)
         if (conf.deletedCount != 0) {
             res.status(200).send("Producto eliminado")
         }

@@ -88,7 +88,6 @@ fetch('http://localhost:8080/api/session/current')
             .then(response => response.json())
             .then(data => {
                 const cartId = data.cart;
-                console.log('DAN:', data)
                 // Realizar la solicitud POST al endpoint de compra del carrito
                 fetch(`http://localhost:8080/api/carts/${cartId}/purchase`, {
                     method: 'POST',
@@ -96,7 +95,6 @@ fetch('http://localhost:8080/api/session/current')
                 .then(response => response.json())
                 .then(data => {
                     // Manejar la respuesta del servidor (puede mostrar un mensaje de éxito o error)
-                    console.log(data);
                     // Mostrar el mensaje de banner y la lista de productos no comprados
                     mostrarMensajeCompra(data);
                 })

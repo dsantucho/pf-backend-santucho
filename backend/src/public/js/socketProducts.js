@@ -34,9 +34,9 @@ socket.on('productList',(data)=>{
 })
  //VUELTA del servidor con EL  producto nuevos para agregar en la lista existente. 
 socket.on('newProduct', (data) => {
-    console.log('newproduct listen: ', data);
+
     products.push(JSON.parse(data));
-    console.log('array products: ', products)
+
     render(products);
 })
 
@@ -53,7 +53,6 @@ function addProduct() {
         thumbnails: document.getElementById('thumbnails').value,
     };
     //envio al servidor
-    console.log('data CON stringgify',JSON.stringify(data))
     socket.emit('addProduct', JSON.stringify(data)); //envio alservidor
     return false
 }

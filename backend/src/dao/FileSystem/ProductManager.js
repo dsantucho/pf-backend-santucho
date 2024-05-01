@@ -26,7 +26,7 @@ class ProductManager {
 
         } catch (error) {
             // Si el archivo no existe o hay algún otro error, se asume un array vacío.
-            console.log("el read sale por vacio []")
+
             this.products = [];
             return this.products;
         }
