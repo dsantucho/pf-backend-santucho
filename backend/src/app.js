@@ -93,12 +93,24 @@ app.use(session({
 initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use('/', uiRouter) //tiene las vistas de home y realtimeProducts
 app.use('/api/products/', routerProd)
 app.use('/api/carts/', routerCart)
 app.use('/auth/',routerAuth)
 app.use('/api/session/', routerSession)
+
+app.get('/sessionSet', (req,res)=>{
+  req.session.user = 'sol';
+  req.session.age = 32;
+  res.send('Session OK!')
+})
+
+console.log(process.env.PORT)
+server.listen(process.env.PORT, () => {
+  console.log("Server listen: ",process.env.PORT);
+  //ON DATABASE
+  DataBase.connect()
+})
 
 //InicialiCarzar el Socket en el servido
 //on prendo socket - escuchador de eventos
@@ -122,16 +134,3 @@ app.use('/api/session/', routerSession)
   })
 
 }) */
-
-app.get('/sessionSet', (req,res)=>{
-  req.session.user = 'sol';
-  req.session.age = 32;
-  res.send('Session OK!')
-})
-
-console.log(process.env.PORT)
-server.listen(process.env.PORT, () => {
-  console.log("Server listen: ",process.env.PORT);
-  //ON DATABASE
-  DataBase.connect()
-})

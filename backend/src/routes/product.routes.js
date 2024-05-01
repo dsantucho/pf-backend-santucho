@@ -4,60 +4,19 @@ const express = require('express');
 //BD
 const Products = require('../modules/product.model.js')
 //middelware
-const {isAdmin, isUser, isAuthenticated} = require('../middlewares/auth.middleware.js')
+const {isAdmin, isUser, isAuthenticated} = require('../middlewares/auth.middleware.js');
+//const {middleware} = require('../utils/errors/middlewares/index.js')
 //FAKER
 const { generateProducts } = require('../mocks/products.mocks.js')
+const {getAllProducts, postAddProduct} = require('../controllers/product.controller.js');
 
 const { Router } = express
-
 const routerProd = new Router()
 const product = new ProductManager(); //instancio productManager
-
+routerProd.use(require('../utils/errors/middlewares/index.js')); // usa el middleware directamente
 //CRUD de productos
 //La ruta raíz GET / deberá listar todos los productos de la base. (Incluyendo la limitación ?limit del desafío anterior
-routerProd.get('/',isAuthenticated, async (req, res) => {
-    try {
-        // Obtener el límite de resultados desde los query parameters
-        // el 10 le indica al parseInt su base
-        const limitQuery = parseInt(req.query.limit, 10) || 10;
-        const pageQuery = parseInt(req.query.page, 10) || 1;
-        const sortQuery = req.query.sort || 'asc';
-        const categoryQuery = req.query.category || '';
-        const statusQuery = req.query.status || true;
-
-        const query = {
-            ...(categoryQuery ? { category: categoryQuery } : {}),
-          };
-
-        let options = {
-            status: statusQuery,
-            sort: { price: sortQuery },
-            limit:limitQuery, 
-            page:pageQuery 
-        }
-
-        let resultPaginate = await Products.paginate(query,options)
-        res.json({
-            status: 'success',
-            payload: resultPaginate.docs,
-            totalPages: resultPaginate.totalPages,
-            prevPage: resultPaginate.prevPage,
-            nextPage: resultPaginate.nextPage,
-            page: resultPaginate.page,
-            hasPrevPage: resultPaginate.hasPrevPage,
-            hasNextPage: resultPaginate.hasNextPage,
-            //esto no esta funcionando bien
-    
-            prevLink: resultPaginate.prevPage ? `/api/products?page=${resultPaginate.prevPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery }` : null,
-            nextLink: resultPaginate.nextPage ? `/api/products?page=${resultPaginate.nextPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery }` : null,
-            
-            totalItems: resultPaginate.totalDocs,
-            currentPage: resultPaginate.page,   
-          });
-    } catch (error) {
-      res.status(500).json({ status: 'error', error: error.message });
-    }
-});
+routerProd.get('/',isAuthenticated, getAllProducts);
 
 //MOCK FAKER
 routerProd.get('/mockingproducts', async (req, res) => {
@@ -94,15 +53,7 @@ routerProd.get('/:pid',isAuthenticated, async (req, res) => {
 
  */
 //DONE
-routerProd.post('/',isAdmin, async (req, res) => {
-    try {
-        const conf = await product.addProduct(req.body);
-        res.status(201).json(conf);
-    } catch (err) {
-        return res.status(500).json({ error: error.message });
-    }
-
-})
+routerProd.post('/',isAdmin, postAddProduct);
 
 //DONE La ruta PUT /:pid deberá tomar un producto y actualizarlo por los campos enviados desde body. NUNCA se debe actualizar o eliminar el id al momento de hacer dicha actualización.
 routerProd.put('/:pid',isAuthenticated, async (req, res) => {
@@ -128,6 +79,7 @@ routerProd.delete('/:pid',isAdmin, async (req, res) => {
         res.status(404).send(err)
     }
 })
+
 
 
 

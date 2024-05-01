@@ -101,16 +101,14 @@ async function addProduct(event) {
     });
 
     if (response.ok) {
-
       console.log('Producto agregado exitosamente = ', response);
       // Después de agregar el producto con éxito, actualiza la lista de productos
       updateProductList();
-
-    } else {
+    } /* else {
       const errorData = await response.json();
       console.error('Error al agregar producto:', errorData.error);
       return errorData
-    }
+    } */
   } catch (error) {
     return console.error('Error al agregar producto:', error);
   }
