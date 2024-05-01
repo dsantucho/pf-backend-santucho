@@ -14,6 +14,7 @@ const generateProducts = () =>{
     stock: faker.number.int({min:1 , max: 20}),
     category:faker.helpers.arrayElement(categoriasDisponibles),
     id: faker.database.mongodbObjectId(),
+    status: true
  }
 }
 
