@@ -43,17 +43,9 @@ router.get('/profile-view',isAuthenticated, async(req,res)=>{
 })
 
 // Agrega la ruta para la página de acceso denegado
-/* router.get('/access-denied', (req, res) => {
-  res.render('denied');
-}); */
 router.get('/access-denied', (req, res) => {
   res.sendFile(__dirname + '/views/denied.html');
 });
 
-
-/* router.get('*', async(req,res)=>{
-  res.status(400).sendFile(absolutePath);
-  //res.sendFile(path [, options] [, fn])
-}) */
 
 module.exports = router

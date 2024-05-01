@@ -1,10 +1,12 @@
 const ProductManager = require('../dao/ProductDao.js');
 const express = require('express');
-const mongoosePaginate = require('mongoose-paginate-v2');
+//const mongoosePaginate = require('mongoose-paginate-v2');
 //BD
 const Products = require('../modules/product.model.js')
 //middelware
 const {isAdmin, isUser, isAuthenticated} = require('../middlewares/auth.middleware.js')
+//FAKER
+const { generateProducts } = require('../mocks/products.mocks.js')
 
 const { Router } = express
 
@@ -56,6 +58,24 @@ routerProd.get('/',isAuthenticated, async (req, res) => {
       res.status(500).json({ status: 'error', error: error.message });
     }
 });
+
+//MOCK FAKER
+routerProd.get('/mockingproducts', async (req, res) => {
+    console.log('entre a /mock');
+    try {
+        const productsMock = [];
+        console.log('PRODuct vacio: ', productsMock)
+        for (let i = 0; i < 100; i++) {
+            console.log('entro al for')
+            const product = generateProducts(); // Genera un producto usando Faker
+            console.log('product:', product)
+            productsMock.push(product); // Agrega el producto al array
+        }
+        res.json({ status: 'success', payload: productsMock });
+    } catch (error) {
+        res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
 
 //La ruta GET /:pid deberá traer sólo el producto con el id proporcionado
 routerProd.get('/:pid',isAuthenticated, async (req, res) => {
@@ -114,6 +134,8 @@ routerProd.delete('/:pid',isAdmin, async (req, res) => {
         res.status(404).send(err)
     }
 })
+
+
 
 module.exports = routerProd;
 
