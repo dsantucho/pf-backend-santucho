@@ -41,6 +41,14 @@ router.get('/register-view', async(req,res)=>{
 router.get('/profile-view',isAuthenticated, async(req,res)=>{
   res.render('profile', {email: req.user.email})
 })
+// Ruta de prueba para el logger
+router.get('/loggerTest', (req, res) => {
+  req.logger.debug('Este es un mensaje de debug');
+  req.logger.info('Este es un mensaje de info');
+  req.logger.warning('Este es un mensaje de warning');
+  req.logger.error('Este es un mensaje de error');
+  res.send('Mensajes de prueba enviados al logger');
+});
 
 // Agrega la ruta para la página de acceso denegado
 router.get('/access-denied', (req, res) => {

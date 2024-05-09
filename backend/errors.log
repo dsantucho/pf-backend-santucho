@@ -1,0 +1,5 @@
+{"level":"http","message":"GET en /loggerTest - at 5/9/2024"}
+{"level":"warning","message":"GET en /loggerTest - at 5/9/2024"}
+{"level":"info","message":"Este es un mensaje de info"}
+{"level":"warning","message":"Este es un mensaje de warning"}
+{"level":"error","message":"Este es un mensaje de error"}

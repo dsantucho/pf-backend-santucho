@@ -21,6 +21,7 @@ const initializePassport = require('./passport/passport.js');
 const { Command } = require('commander');
 const dotenv = require('dotenv');
 const cors = require("cors");
+const {addLogger} = require('./utils/logger.js');
 
 //cors 
 // 1 origin
@@ -49,20 +50,18 @@ const io = new Server(server);
 // Commander
 const program = new Command();
 program
-  .option('-d', 'Variable para hacer debug', false)
   .option('--mode <mode>', 'Modo de trabajo' , 'dev')
   program.parse()
 // Cargar la configuración de .env.dev o .env.prod dependiendo del modo
 try {
-  console.log('que entra opts: ', program.opts().mode)
   dotenv.config({
-    path: program.opts().mode == 'dev' ? '.env.dev' : '.env.prod'
+    path: program.opts().mode == 'DEV' ? '.env.dev' : '.env.prod'
   });
-  console.log('Options mode: ', program.opts())
 } catch (error) {
   console.error('Error cargando archivos .env:', error);
 }
 
+app.use(addLogger)
 //cors
 app.use(cors(corsOptions))
 //Public
@@ -105,9 +104,8 @@ app.get('/sessionSet', (req,res)=>{
   res.send('Session OK!')
 })
 
-console.log(process.env.PORT)
 server.listen(process.env.PORT, () => {
-  console.log("Server listen: ",process.env.PORT);
+  console.log("## Server listen: ",process.env.PORT , 'Environment: ', process.env.MODE);
   //ON DATABASE
   DataBase.connect()
 })
