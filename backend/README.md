@@ -1,5 +1,6 @@
 Para inicializar 
-1- npm start --mode dev => abre 8080
+2.1 nodemon src/app.js --mode PROD => http://localhost:4080/loggerTest
+2.2 nodemon src/app.js --mode DEV  => http://localhost:8080/loggerTest
 2 - inicializar tailwindcss = npx tailwindcss -i ./src/input.css -o ./src/public/css/output.css --watch
 
 

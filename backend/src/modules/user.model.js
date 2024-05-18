@@ -33,6 +33,13 @@ const UserSchema = new mongoose.Schema(
             require: true,
             default: 'user',
             enum: ['user', 'admin']
+        },
+        //esto es para el resert pasword
+        resetPasswordToken: {
+            type: String
+        },
+        resetPasswordExpires: {
+            type: Date
         }
     },
     {

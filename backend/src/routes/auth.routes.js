@@ -1,9 +1,11 @@
 const express = require('express');
 const { Router } = express;
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
 const passport = require('passport');
 const userModel = require('../modules/user.model');
+const transporter = require('../config/email/mailing');
 
 const router = new Router();
 
@@ -48,42 +50,77 @@ router.get('/forgot-password', (req, res) => {
     res.render('forgotPassword');
 });
 
-// Ruta para manejar la solicitud de restablecimiento de contraseña
+// Nueva ruta para olvidó contraseña
 router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+        return res.status(400).render('forgotPassword', { message: 'Usuario no encontrado' });
+    }
+
+    // Generar y almacenar el token de restablecimiento
+    const token = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+
+    await user.save();
+
+    const resetLink = `http://${req.headers.host}/auth/reset-password/${token}`;
+
+    // Configurar el correo
+    const mailOptions = {
+        to: user.email,
+        from: 'soledadsantucho@gmail.com',
+        subject: 'Restablecimiento de contraseña',
+        text: `Recibiste este correo porque tú (u otra persona) solicitó restablecer la contraseña de tu cuenta.\n\n
+        Haz clic en el siguiente enlace, o pégalo en tu navegador para completar el proceso:\n\n
+        ${resetLink}\n\n
+        Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.\n`
+    };
+
     try {
-        const { email } = req.body;
-
-        // Aquí deberías enviar el correo electrónico con el enlace de restablecimiento de contraseña
-        // y manejar la lógica para generar y almacenar el token de restablecimiento en la base de datos
-
-        res.render('passwordResetSent');
+        await transporter.sendMail(mailOptions);
+        res.render('forgotPassword', { message: 'Revise su email para restablecer la contraseña', disableEmailInput: true });
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error al procesar la solicitud');
+        console.error('Error enviando el correo:', error);
+        res.status(500).render('forgotPassword', { message: 'Error enviando el correo' });
     }
 });
 
-// Ruta para restablecer la contraseña
-router.get('/reset-password/:token', (req, res) => {
-    const token = req.params.token;
-    // Aquí deberías verificar si el token es válido y renderizar la vista de restablecimiento de contraseña
+// Ruta para manejar el formulario de restablecimiento de contraseña
+router.get('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
+    const user = await userModel.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
+
+    if (!user) {
+        return res.render('forgotPassword', { message: 'El enlace de restablecimiento de contraseña es inválido o ha expirado' });
+    }
+
     res.render('resetPassword', { token });
 });
 
+// Ruta para manejar el restablecimiento de contraseña
 router.post('/reset-password/:token', async (req, res) => {
-    try {
-        const token = req.params.token;
-        const { password } = req.body;
+    const { token } = req.params;
+    const { password } = req.body;
+    const user = await userModel.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
 
-        // Aquí deberías verificar si el token es válido y actualizar la contraseña del usuario en la base de datos
-
-        res.render('passwordResetSuccess');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error al procesar la solicitud');
+    if (!user) {
+        return res.render('forgotPassword', { message: 'El enlace de restablecimiento de contraseña es inválido o ha expirado' });
     }
-});
 
+    if (isValidatePassword(user, password)) {
+        return res.render('resetPassword', { token, message: 'No puedes usar la misma contraseña que antes' });
+    }
+
+    user.password = createHash(password);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+    res.redirect('/login-view');
+});
 module.exports = router;
 
 
