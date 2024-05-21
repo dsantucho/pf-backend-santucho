@@ -1,18 +1,32 @@
 let paginationLinks = [];  // Array para almacenar los objetos de paginación
 
-function bannerPersonalDataAdmin(data) {
+async function bannerPersonalDataAdmin(data) {
+    // Obtener información del usuario actual
+    const userResponse = await fetch('http://localhost:8080/api/session/current');
+    const currentUser = await userResponse.json();
   document.getElementById('bannerPersonalDataAdmin').innerHTML =
     (`
        <h1 class ="text-4xl tracking-wide font-sans" >User Profile</h1>
        <h1 class="text-2xl tracking-wide font-sans">Nombre: ${data.email}!</h1>
        <p  class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
        <p class = "text-2xl tracking-wide font-sans">Mi Carrito = ${data.cart} </p>
+       <strong id="productOwner">Propietario:</strong> ${currentUser._id}<br>
        <div class= "my-3"> 
        <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="/auth/logout">Logout</a>
        <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="http://localhost:8080/products">Ir a Productos</a>
        </div>
       `)
 }
+// Actualiza la llamada a bannerPersonalDataAdmin en el código
+fetch('http://localhost:8080/api/session/current').then((response) => {
+  response.json().then(data => {
+    bannerPersonalDataAdmin(data);
+  });
+})
+  .catch(error => {
+    console.error('Error al obtener información del usuario actual:', error);
+  });
+
 function pagesInfo(data) {
   document.getElementById('pages').innerHTML = (`
     <div>
@@ -22,8 +36,17 @@ function pagesInfo(data) {
   `);
 };
 
-function render(data) {
+async function render(data) {
+    // Obtener información del usuario actual
+    const userResponse = await fetch('http://localhost:8080/api/session/current');
+    const currentUser = await userResponse.json();
   const html = data.map(elem => {
+    let owner = 'undefined';
+    if (elem.owner) {
+      owner = elem.owner === 'admin' ? 'admin' : elem.owner;
+    }
+        // Condición para mostrar el botón de eliminar
+        const showDeleteButton = currentUser.role === 'admin' || (currentUser.role === 'premium' && elem.owner === currentUser._id);
     return (`
     <div id="productCard_${elem._id}" class="w-full rounded overflow-hidden shadow-lg bg-white m-4">
     <div class="px-6 py-4">
@@ -32,26 +55,28 @@ function render(data) {
         <strong id="productPrice">Precio:</strong> $${elem.price}<br>
         <strong id="productCategory">Categoría:</strong> ${elem.category}<br>
         <strong id="productStock">Stock:</strong> ${elem.stock}<br>
+        <strong>Codigo:</strong> ${elem.code}<br>
         <strong>ID:</strong> ${elem._id}<br>
+        <strong id="productOwner">Propietario:</strong> ${owner}<br>
       </p>
     </div>
     <div class="flex justify-center">
-      <button onclick="edit('${elem._id}')" class="bg-red-600 m-3 text-white font-bold py-2 px-4 rounded">Editar Producto</button>
-      <button onclick="deleteProduct('${elem._id}')" class="bg-black m-3 text-white font-bold py-2 px-4 rounded">Eliminar Producto</button>
-    </div>
+    <button onclick="edit('${elem._id}')" class="bg-red-600 m-3 text-white font-bold py-2 px-4 rounded">Editar Producto</button>
+    ${showDeleteButton ? `<button onclick="deleteProduct('${elem._id}')" class="bg-black m-3 text-white font-bold py-2 px-4 rounded">Eliminar Producto</button>` : ''}
+  </div>
 
     <!-- Formulario de edición -->
-    <form id="editForm_${elem._id}" class="editForm" style="display: none;">
-      <label for="editTitle_${elem._id}">Título:</label>
-      <input type="text" id="editTitle_${elem._id}" name="editTitle" value="${elem.title}" ><br>
-      <label for="editPrice_${elem._id}">Precio:</label>
-      <input type="number" id="editPrice_${elem._id}" name="editPrice" value="${elem.price}" step="0.01" ><br>
-      <label for="editCategory_${elem._id}">Categoría:</label>
-      <input type="text" id="editCategory_${elem._id}" name="editCategory" value="${elem.category}" ><br>
-      <label for="editStock_${elem._id}">Stock:</label>
-      <input type="number" id="editStock_${elem._id}" name="editStock" value="${elem.stock}"><br>
+    <form id="editForm_${elem._id}" class="editForm bg-white p-4 rounded shadow-md" style="display: none;">
+      <label for="editTitle_${elem._id}" class="block text-gray-700 text-sm font-bold my-2">Título:</label>
+      <input type="text" id="editTitle_${elem._id}" name="editTitle" value="${elem.title}" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"><br>
+      <label for="editPrice_${elem._id}" class="block text-gray-700 text-sm font-bold my-2">Precio:</label>
+      <input type="number" id="editPrice_${elem._id}" name="editPrice" value="${elem.price}" step="0.01" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"><br>
+      <label for="editCategory_${elem._id}" class="block text-gray-700 text-sm font-bold my-2">Categoría:</label>
+      <input type="text" id="editCategory_${elem._id}" name="editCategory" value="${elem.category}" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"><br>
+      <label for="editStock_${elem._id}" class="block text-gray-700 text-sm font-bold my-2">Stock:</label>
+      <input type="number" id="editStock_${elem._id}" name="editStock" value="${elem.stock}" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"><br>
 
-      <button type="button" onclick="submitEdit('${elem._id}')">Guardar Cambios</button>
+      <button type="button" onclick="submitEdit('${elem._id}')" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mx-auto my-8">Guardar Cambios</button>
     </form>
   </div>
       `);
@@ -278,15 +303,6 @@ function updatePagination(data) {
   paginationData(paginationLinks);
 }
 
-// Obtener información del usuario actual
-fetch('http://localhost:8080/api/session/current').then((response) => {
-  response.json().then(data => {
-    bannerPersonalDataAdmin(data);
-  });
-})
-  .catch(error => {
-    console.error('Error al obtener información del usuario actual:', error);
-  });
 //por HTTP request
 fetch('http://localhost:8080/api/products/?limit=4&page=1').then((response) => {
   response.json().then(data => {
