@@ -23,6 +23,9 @@ const { Command } = require('commander');
 const dotenv = require('dotenv');
 const cors = require("cors");
 const {addLogger} = require('./utils/logger.js');
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUIExpress = require('swagger-ui-express')
+
 
 //cors 
 // 1 origin
@@ -91,6 +94,20 @@ app.use(session({
 }));
 
 initializePassport();
+const swaggerOptions = {
+  definition: {
+      openapi: "3.0.1",
+      info: {
+          title: "Documentacion API Adoptme",
+          description: "Documentacion API Adoptme - para uso de swagger"
+      }
+
+  },
+  apis: [`./src/docs/**/*.yaml`]
+}
+const specs = swaggerJSDoc(swaggerOptions)
+app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs))
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/', uiRouter) //tiene las vistas de home y realtimeProducts
