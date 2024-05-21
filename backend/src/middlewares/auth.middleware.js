@@ -10,6 +10,20 @@ const isAdmin = (req, res, next) => {
         res.status(401).render('denied');
     }
 };
+const isPremium = (req, res, next) => {
+    if (req.user && req.user.role === 'premium') {
+        next();
+    } else {
+        res.status(401).render('denied');
+    }
+};
+const isAdminOrPremium = (req, res, next) => {
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'premium')) {
+        next();
+    } else {
+        res.status(401).render('denied');
+    }
+};
 
 const isUser = (req, res, next) => {
     // Verificar si el usuario está autenticado y tiene el rol de administrador
@@ -34,4 +48,4 @@ const isAuthenticated = (req, res, next) => {
 };
 
 
-module.exports = {isAdmin, isUser, isAuthenticated};
+module.exports = {isAdmin, isUser, isAuthenticated, isPremium, isAdminOrPremium};

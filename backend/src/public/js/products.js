@@ -101,7 +101,7 @@ async function addToCart(productId) {
 }
 function infoBienvenida (data){
   let isAdminButton = '';
-  if (data.role === 'admin') {
+  if (data.role === 'admin' || data.role === 'premium') {
     isAdminButton = `<div class="mt-4">
                       <a class="font-bold py-2 px-4 rounded text-white bg-blue-600" href="/admin-view">Admin Products</a>
                     </div>`;

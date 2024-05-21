@@ -36,6 +36,17 @@ const ProductSchema = new mongoose.Schema({
         require: true,
         enum: ['Hogar', 'Tecnologia', 'Cocina','Higiene']
     },
+    owner: {
+        /*type: mongoose.Schema.Types.Mixed: El tipo Mixed permite que el campo owner acepte valores de diferentes tipos. En este caso, permite tanto un ObjectId (que es el tipo utilizado para referenciar documentos en MongoDB) como una cadena de texto ('admin'). */
+        type: mongoose.Schema.Types.Mixed, // Allow both ObjectId and String
+        required: true,
+        validate: {
+            validator: function(value) {
+                return mongoose.Types.ObjectId.isValid(value) || value === 'admin';
+            },
+            message: props => `${props.value} is not a valid owner!`
+        }
+    }
 })
 ProductSchema.plugin(mongoPaginate);
 const Product = mongoose.model('product',ProductSchema);

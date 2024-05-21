@@ -1,7 +1,7 @@
 const express = require('express')
 const {Router} = express
 //middelware
-const {isAdmin, isUser, isAuthenticated} = require('../middlewares/auth.middleware.js')
+const {isAdmin, isUser, isAuthenticated, isAdminOrPremium} = require('../middlewares/auth.middleware.js')
 
 
 const router = new Router()
@@ -27,7 +27,7 @@ router.get('/carts/:cid',isAuthenticated, async (req, res)=>{
   res.render('realtimeProducts',{});
 })  */
 //admin-view
-router.get('/admin-view', isAdmin, async(req,res)=>{
+router.get('/admin-view', isAdminOrPremium, async(req,res)=>{
   res.render('adminView')
 })
 //login vista

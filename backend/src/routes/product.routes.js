@@ -4,7 +4,7 @@ const express = require('express');
 //BD
 const Products = require('../modules/product.model.js')
 //middelware
-const {isAdmin, isUser, isAuthenticated} = require('../middlewares/auth.middleware.js');
+const {isAdmin, isUser, isAuthenticated, isPremium, isAdminOrPremium} = require('../middlewares/auth.middleware.js');
 //const {middleware} = require('../utils/errors/middlewares/index.js')
 //FAKER
 const { generateProducts } = require('../mocks/products.mocks.js')
@@ -53,7 +53,7 @@ routerProd.get('/:pid',isAuthenticated, async (req, res) => {
 
  */
 //DONE
-routerProd.post('/',isAdmin, postAddProduct);
+routerProd.post('/',isAdminOrPremium, postAddProduct);
 
 //DONE La ruta PUT /:pid deberá tomar un producto y actualizarlo por los campos enviados desde body. NUNCA se debe actualizar o eliminar el id al momento de hacer dicha actualización.
 routerProd.put('/:pid',isAuthenticated, async (req, res) => {
