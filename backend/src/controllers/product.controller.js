@@ -49,25 +49,6 @@ const  getAllProducts = async (req,res)=>{
       res.status(500).json({ status: 'error', error: error.message });
     }
 }
-
-const postAddProduct_viejo = async(req, res) =>{
-    const {title, price, code, stock, category} = req.body
-
-    //costumError
-    if(!title || !price || !code || !stock || !category){
-        CustomError.createError({
-            name: "Product creation Error",
-            cause: generateProductErrorInfoSP({ title, price, code, stock, category }),
-            message: "Error tratando de crear el producto",
-            code: EErrors.INVALID_TYPES_ERROR
-        })
-    }
-    //si todo sale bien
-    const conf = await product.addProduct(req.body);
-    res.status(201).json(conf);
-
-}
-
 const postAddProduct = async (req, res) => {
     const { title, price, code, stock, category } = req.body;
 
@@ -100,4 +81,37 @@ const postAddProduct = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
-module.exports = {getAllProducts, postAddProduct}
+const updateProduct = async (req, res) => {
+    const productId = req.params.pid;
+    const dataReplace = req.body;
+
+    try {
+        const conf = await product.updateProduct({ _id: productId }, dataReplace);
+        res.status(200).send(conf);
+    } catch (err) {
+        res.status(404).send(err);
+    }
+}
+
+const deleteProduct = async (req, res) => {
+    const productId = req.params.pid;
+
+    try {
+        const product = await Products.findById(productId);
+        if (!product) {
+            return res.status(404).send("Producto no encontrado");
+        }
+
+        if (req.user.role === 'admin' || (req.user.role === 'premium' && product.owner.toString() === req.user._id.toString())) {
+            const conf = await Products.deleteOne({ _id: productId });
+            if (conf.deletedCount != 0) {
+                res.status(200).send("Producto eliminado");
+            }
+        } else {
+            res.status(403).send("No tiene permiso para eliminar este producto");
+        }
+    } catch (err) {
+        res.status(404).send(err);
+    }
+}
+module.exports = {getAllProducts, postAddProduct, updateProduct, deleteProduct}

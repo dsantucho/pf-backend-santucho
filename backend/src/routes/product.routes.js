@@ -8,7 +8,7 @@ const {isAdmin, isUser, isAuthenticated, isPremium, isAdminOrPremium} = require(
 //const {middleware} = require('../utils/errors/middlewares/index.js')
 //FAKER
 const { generateProducts } = require('../mocks/products.mocks.js')
-const {getAllProducts, postAddProduct} = require('../controllers/product.controller.js');
+const {getAllProducts, postAddProduct, updateProduct, deleteProduct} = require('../controllers/product.controller.js');
 
 const { Router } = express
 const routerProd = new Router()
@@ -56,29 +56,10 @@ routerProd.get('/:pid',isAuthenticated, async (req, res) => {
 routerProd.post('/',isAdminOrPremium, postAddProduct);
 
 //DONE La ruta PUT /:pid deberá tomar un producto y actualizarlo por los campos enviados desde body. NUNCA se debe actualizar o eliminar el id al momento de hacer dicha actualización.
-routerProd.put('/:pid',isAuthenticated, async (req, res) => {
-    const productId = req.params.pid; //tomo el id
-    const dataReplace = req.body //data a hacer update
-    try {
-        const conf = await product.updateProduct({ _id: productId }, dataReplace);
-        res.status(200).send(conf)
-    } catch (err) {
-        res.status(404).send(err)
-    }
-})
+routerProd.put('/:pid',isAdminOrPremium, updateProduct);
 
 //DONE La ruta DELETE /:pid deberá eliminar el producto con el pid indicado. 
-routerProd.delete('/:pid',isAdmin, async (req, res) => {
-    const productId = req.params.pid;
-    try {
-        const conf = await product.deleteProduct({ _id: productId });
-        if (conf.deletedCount != 0) {
-            res.status(200).send("Producto eliminado")
-        }
-    } catch (err) {
-        res.status(404).send(err)
-    }
-})
+routerProd.delete('/:pid',isAdminOrPremium, deleteProduct)
 
 
 
