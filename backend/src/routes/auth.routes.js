@@ -122,18 +122,3 @@ router.post('/reset-password/:token', async (req, res) => {
     res.redirect('/login-view');
 });
 module.exports = router;
-
-
-
-
-
-
-
-router.get('/users', async (req,res)=>{
-    let allusers = await userModel.find()
-    res.send(allusers);
-})
-
-
-
-module.exports = router

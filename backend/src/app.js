@@ -11,6 +11,7 @@ const routerCart = require("./routes/carts.routes.js");
 const routerAuth = require("./routes/auth.routes.js")
 const uiRouter = require("./routes/app.routes.js");
 const routerSession = require("./routes/session.routes.js");
+const userRouter = require("./routes/user.routes.js")
 const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
@@ -97,6 +98,7 @@ app.use('/api/products/', routerProd)
 app.use('/api/carts/', routerCart)
 app.use('/auth/',routerAuth)
 app.use('/api/session/', routerSession)
+app.use('/api/users', userRouter);
 
 app.get('/sessionSet', (req,res)=>{
   req.session.user = 'sol';
