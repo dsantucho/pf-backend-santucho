@@ -6,6 +6,7 @@ Para inicializar
 
 Link Git= https://github.com/dsantucho/pf-backend-santucho
 
+SWAGGER = http://localhost:8080/apidocs/
 
 
 Links view:
