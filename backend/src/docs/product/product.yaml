@@ -1,0 +1,49 @@
+servers:
+  - url: http://localhost:8080/
+    description: localhost de dev
+components:
+  schemas:
+    product:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the product
+          example: 'Smartphone'
+        description:
+          type: string
+          description: A short description of the product
+          example: 'Latest model with advanced features'
+        price:
+          type: number
+          description: The price of the product
+          example: 999.99
+        thumbnails:
+          type: string
+          description: A URL to a thumbnail image of the product
+          example: 'http://example.com/thumbnail.jpg'
+        code:
+          type: string
+          description: A unique code for the product
+          example: 'SP123'
+        stock:
+          type: string
+          description: The number of items in stock
+          example: '500'
+        status:
+          type: boolean
+          description: The availability status of the product
+          example: true
+        category:
+          type: string
+          description: The category of the product
+          enum:
+            - Hogar
+            - Tecnologia
+            - Cocina
+            - Higiene
+          example: 'Tecnologia'
+        owner:
+          type: string
+          description: The owner of the product
+          example: 'admin'

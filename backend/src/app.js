@@ -94,19 +94,6 @@ app.use(session({
 }));
 
 initializePassport();
-const swaggerOptions = {
-  definition: {
-      openapi: "3.0.1",
-      info: {
-          title: "Documentacion API Adoptme",
-          description: "Documentacion API Adoptme - para uso de swagger"
-      }
-
-  },
-  apis: [`./src/docs/**/*.yaml`]
-}
-const specs = swaggerJSDoc(swaggerOptions)
-app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs))
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -116,6 +103,20 @@ app.use('/api/carts/', routerCart)
 app.use('/auth/',routerAuth)
 app.use('/api/session/', routerSession)
 app.use('/api/users', userRouter);
+const swaggerOptions = {
+  definition: {
+      openapi: "3.0.1",
+      info: {
+          title: "Documentacion API",
+          description: "Proyecto Backend Coderhouse - Se realiza la documentacion de las apis de product y cart"
+      }
+
+  },
+  apis: [`./src/docs/**/*.yaml`]
+}
+const specs = swaggerJSDoc(swaggerOptions)
+app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs))
+
 
 app.get('/sessionSet', (req,res)=>{
   req.session.user = 'sol';
