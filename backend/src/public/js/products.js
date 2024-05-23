@@ -1,4 +1,16 @@
 let paginationLinks = [];  // Array para almacenar los objetos de paginación
+let apiUrl = '';
+// ** FETCH **
+// Obtener la configuración del servidor y luego ejecutar las funciones necesarias
+fetch('/api/config')
+    .then(response => response.json())
+    .then(config => {
+        apiUrl = `http://localhost:${config.apiUrl}`;
+        console.log(apiUrl)
+    })
+    .catch(error => {
+        console.error('Error al obtener la configuración del servidor:', error);
+    });
 
 function pagesInfo(data) {
   document.getElementById('pages').innerHTML = (`
@@ -60,8 +72,8 @@ function render(data, currentUser) {
 // Función para obtener productos y el usuario actual, y renderizar la lista
 async function fetchProducts(page = 1) {
   try {
-    const response = await fetch(`http://localhost:8080/api/products/?limit=8&page=${page}`);
-    const userResponse = await fetch('http://localhost:8080/api/session/current');
+    const response = await fetch(`${apiUrl}/api/products/?limit=8&page=${page}`);
+    const userResponse = await fetch(`${apiUrl}/api/session/current`);
     const currentUser = await userResponse.json();
 
     if (response.ok) {
@@ -115,11 +127,11 @@ function updatePagination(data) {
   paginationLinks = [];  // Limpiar el array antes de actualizarlo
 
   if (data.prevPage) {
-    paginationLinks.push({ type: 'prevLink', link: `http://localhost:8080/api/products/?limit=8&page=${data.prevPage}` });
+    paginationLinks.push({ type: 'prevLink', link: `${apiUrl}/api/products/?limit=8&page=${data.prevPage}` });
   }
 
   if (data.nextPage) {
-    paginationLinks.push({ type: 'nextLink', link: `http://localhost:8080/api/products/?limit=8&page=${data.nextPage}` });
+    paginationLinks.push({ type: 'nextLink', link: `${apiUrl}/api/products/?limit=8&page=${data.nextPage}` });
   }
 
   console.log(paginationLinks);
@@ -127,15 +139,15 @@ function updatePagination(data) {
 }
 
 function irCarrito() {
-  window.location.href = 'http://localhost:8080/profile-view';
+  window.location.href = `${apiUrl}/profile-view`;
 }
 
 async function addToCart(productId) {
   try {
-    const userResponse = await fetch('http://localhost:8080/api/session/current');
+    const userResponse = await fetch(`${apiUrl}/api/session/current`);
     const userData = await userResponse.json();
     const cartId = userData.cart;
-    const addToCartResponse = await fetch(`http://localhost:8080/api/carts/${cartId}/product/${productId}`, {
+    const addToCartResponse = await fetch(`${apiUrl}/api/carts/${cartId}/product/${productId}`, {
       method: 'POST'
     });
     const result = await addToCartResponse.json();
@@ -168,6 +180,6 @@ function infoBienvenida(data) {
 
 fetchProducts(); // Llama a fetchProducts al cargar la página
 
-fetch('http://localhost:8080/api/session/current').then(response => response.json()).then(data => {
+fetch(`${apiUrl}/api/session/current`).then(response => response.json()).then(data => {
   infoBienvenida(data);
 });

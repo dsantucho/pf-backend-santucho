@@ -4,7 +4,7 @@ const express = require("express");
 const DataBase = require('./config/db.js')
 const handlebars = require("express-handlebars");
 const { Server } = require("socket.io");
-const MongoStore = require ('connect-mongo');
+const MongoStore = require('connect-mongo');
 const session = require('express-session');
 const routerProd = require("./routes/product.routes.js");
 const routerCart = require("./routes/carts.routes.js");
@@ -16,24 +16,18 @@ const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
 //const ProductManager = require("./dao/FileSystem/ProductManager.js");qßweqweßß
-const ProductManager = require ('./dao/ProductDao.js');
+const ProductManager = require('./dao/ProductDao.js');
 const passport = require('passport');
 const initializePassport = require('./passport/passport.js');
 const { Command } = require('commander');
 const dotenv = require('dotenv');
 const cors = require("cors");
-const {addLogger} = require('./utils/logger.js');
+const { addLogger } = require('./utils/logger.js');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUIExpress = require('swagger-ui-express')
 
 
-//cors 
-// 1 origin
-const corsOptions = {
-  origin: "http://localhost:8080/",
-  methods: ['GET', 'POST', 'PUT'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-} 
+
 // many origins 
 /* const whiteList = ['http://localhost:8080/', 'http://localhost:8080/', 'http://localhost:8080/'];
 const corsOptions = {
@@ -53,9 +47,8 @@ const io = new Server(server);
 
 // Commander
 const program = new Command();
-program
-  .option('--mode <mode>', 'Modo de trabajo' , 'dev')
-  program.parse()
+program.option('--mode <mode>', 'Modo de trabajo', 'dev')
+program.parse()
 // Cargar la configuración de .env.dev o .env.prod dependiendo del modo
 try {
   dotenv.config({
@@ -63,6 +56,13 @@ try {
   });
 } catch (error) {
   console.error('Error cargando archivos .env:', error);
+}
+//cors 
+// 1 origin
+const corsOptions = {
+  origin: `http://localhost${process.env.PORT}/`,
+  methods: ['GET', 'POST', 'PUT'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }
 
 app.use(addLogger)
@@ -88,44 +88,49 @@ app.use(session({
     mongoUrl: 'mongodb+srv://dsantucho:coder123456@proyectofinalbk.syalrvk.mongodb.net/ecommerce',
     //ttl: 10
   }),
-  secret:'secretCoder',
-  resave:true,
+  secret: 'secretCoder',
+  resave: true,
   saveUninitialized: true
 }));
 
-initializePassport();
+initializePassport(process.env.PORT);
 
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/', uiRouter) //tiene las vistas de home y realtimeProducts
 app.use('/api/products/', routerProd)
 app.use('/api/carts/', routerCart)
-app.use('/auth/',routerAuth)
+app.use('/auth/', routerAuth)
 app.use('/api/session/', routerSession)
 app.use('/api/users', userRouter);
 const swaggerOptions = {
   definition: {
-      openapi: "3.0.1",
-      info: {
-          title: "Documentacion API",
-          description: "Proyecto Backend Coderhouse - Se realiza la documentacion de las apis de product y cart"
-      }
+    openapi: "3.0.1",
+    info: {
+      title: "Documentacion API",
+      description: "Proyecto Backend Coderhouse - Se realiza la documentacion de las apis de product y cart"
+    }
 
   },
   apis: [`./src/docs/**/*.yaml`]
 }
 const specs = swaggerJSDoc(swaggerOptions)
 app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs))
+// Ruta para devolver la configuración actual
+app.get('/api/config', (req, res) => {
+  res.json({
+    apiUrl: process.env.PORT
+  });
+});
 
-
-app.get('/sessionSet', (req,res)=>{
+/* app.get('/sessionSet', (req,res)=>{
   req.session.user = 'sol';
   req.session.age = 32;
   res.send('Session OK!')
-})
+}) */
 
 server.listen(process.env.PORT, () => {
-  console.log("## Server listen: ",process.env.PORT , 'Environment: ', process.env.MODE);
+  console.log("## Server listen: ", process.env.PORT, 'Environment: ', process.env.MODE);
   //ON DATABASE
   DataBase.connect()
 })

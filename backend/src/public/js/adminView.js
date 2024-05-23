@@ -1,31 +1,44 @@
 let paginationLinks = [];  // Array para almacenar los objetos de paginación
+let apiUrl = '';
+// ** FETCH **
+// Obtener la configuración del servidor y luego ejecutar las funciones necesarias
+fetch('/api/config')
+    .then(response => response.json())
+    .then(config => {
+        apiUrl = `http://localhost:${config.apiUrl}`;
+        // Realizar las solicitudes fetch necesarias después de obtener la configuración
+        fetchCurrentUser();
+        updateProductList();
+    })
+    .catch(error => {
+        console.error('Error al obtener la configuración del servidor:', error);
+    });
 
-async function bannerPersonalDataAdmin(data) {
-    // Obtener información del usuario actual
-    const userResponse = await fetch('http://localhost:8080/api/session/current');
-    const currentUser = await userResponse.json();
+function fetchCurrentUser() {
+    fetch(`${apiUrl}/api/session/current`)
+        .then(response => response.json())
+        .then(data => {
+            bannerPersonalDataAdmin(data);
+        })
+        .catch(error => {
+            console.error('Error al obtener información del usuario actual:', error);
+        });
+}
+
+function bannerPersonalDataAdmin(data) {
   document.getElementById('bannerPersonalDataAdmin').innerHTML =
     (`
        <h1 class ="text-4xl tracking-wide font-sans" >User Profile</h1>
        <h1 class="text-2xl tracking-wide font-sans">Nombre: ${data.email}!</h1>
        <p  class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
        <p class = "text-2xl tracking-wide font-sans">Mi Carrito = ${data.cart} </p>
-       <strong id="productOwner">Propietario:</strong> ${currentUser._id}<br>
+       <strong id="productOwner">Propietario:</strong> ${data._id}<br>
        <div class= "my-3"> 
        <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="/auth/logout">Logout</a>
-       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="http://localhost:8080/products">Ir a Productos</a>
+       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="${apiUrl}/products">Ir a Productos</a>
        </div>
       `)
 }
-// Actualiza la llamada a bannerPersonalDataAdmin en el código
-fetch('http://localhost:8080/api/session/current').then((response) => {
-  response.json().then(data => {
-    bannerPersonalDataAdmin(data);
-  });
-})
-  .catch(error => {
-    console.error('Error al obtener información del usuario actual:', error);
-  });
 
 function pagesInfo(data) {
   document.getElementById('pages').innerHTML = (`
@@ -38,7 +51,7 @@ function pagesInfo(data) {
 
 async function render(data) {
     // Obtener información del usuario actual
-    const userResponse = await fetch('http://localhost:8080/api/session/current');
+    const userResponse = await fetch(`${apiUrl}/api/session/current`);
     const currentUser = await userResponse.json();
   const html = data.map(elem => {
     let owner = 'undefined';
@@ -87,7 +100,7 @@ async function render(data) {
 
 async function updateProductList() {
   try {
-    const response = await fetch('http://localhost:8080/api/products/?limit=4&page=1');
+    const response = await fetch(`${apiUrl}/api/products/?limit=4&page=1`);
     if (response.ok) {
       const data = await response.json();
       render(data.payload);
@@ -116,8 +129,8 @@ async function addProduct(event) {
       thumbnails: document.getElementById('thumbnails').value,
     };
 
-    console.log('data CON stringgify', JSON.stringify(data))
-    const response = await fetch(`http://localhost:8080/api/products/`, {
+    //console.log('data CON stringgify', JSON.stringify(data))
+    const response = await fetch(`${apiUrl}/api/products/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json', // Indicar que el contenido es JSON
@@ -129,11 +142,9 @@ async function addProduct(event) {
       console.log('Producto agregado exitosamente = ', response);
       // Después de agregar el producto con éxito, actualiza la lista de productos
       updateProductList();
-    } /* else {
-      const errorData = await response.json();
-      console.error('Error al agregar producto:', errorData.error);
-      return errorData
-    } */
+    } else {
+      console.error('Error al agregar producto:', response);
+    }
   } catch (error) {
     return console.error('Error al agregar producto:', error);
   }
@@ -215,7 +226,7 @@ async function submitEdit(productId) {
       category: document.getElementById(`editCategory_${productId}`).value,
       stock: document.getElementById(`editStock_${productId}`).value
     };
-    const response = await fetch(`http://localhost:8080/api/products/${productId}`, {
+    const response = await fetch(`${apiUrl}/api/products/${productId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -238,7 +249,7 @@ async function submitEdit(productId) {
 
 async function deleteProduct(productId) {
   try {
-    const response = await fetch(`http://localhost:8080/api/products/${productId}`, {
+    const response = await fetch(`${apiUrl}/api/products/${productId}`, {
       method: 'DELETE'
     });
     if (response.ok) {
@@ -304,7 +315,7 @@ function updatePagination(data) {
 }
 
 //por HTTP request
-fetch('http://localhost:8080/api/products/?limit=4&page=1').then((response) => {
+fetch(`${apiUrl}/api/products/?limit=4&page=1`).then((response) => {
   response.json().then(data => {
     render(data.payload);
     updatePagination(data);
@@ -313,3 +324,4 @@ fetch('http://localhost:8080/api/products/?limit=4&page=1').then((response) => {
   });
   console.log('Se envio la data desde fetch');
 });
+

@@ -1,3 +1,16 @@
+let apiUrl = '';
+// ** FETCH ${apiUrl} **
+// Obtener la configuración del servidor y luego ejecutar las funciones necesarias
+fetch('/api/config')
+    .then(response => response.json())
+    .then(config => {
+        apiUrl = `http://localhost:${config.apiUrl}`;
+        console.log(apiUrl)
+    })
+    .catch(error => {
+        console.error('Error al obtener la configuración del servidor:', error);
+    });
+
 function bannerPersonalData (data){
     document.getElementById('bannerPersonalData').innerHTML = 
        (`
@@ -6,7 +19,7 @@ function bannerPersonalData (data){
        <p  class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
        <p class = "text-2xl tracking-wide font-sans">Mi Carrito = ${data.cart} </p>
        <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="/auth/logout">Logout</a>
-       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="http://localhost:8080/products">Ir a Productos</a>
+       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="${apiUrl}/products">Ir a Productos</a>
 
       `) 
   }
@@ -19,7 +32,7 @@ function bannerPersonalData (data){
         cartListElement.innerHTML = `
             <div class="text-center">
                 <p class="text-xl font-bold">No hay productos en tu carrito</p>
-                <button onclick="window.location.href = 'http://localhost:8080/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
+                <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
             </div>`;
     } else {
             // Si hay productos en el carrito, generar el HTML para mostrar los productos
@@ -56,13 +69,13 @@ function bannerPersonalData (data){
 }
 
 // Obtener información del usuario actual
-fetch('http://localhost:8080/api/session/current')
+fetch(`${apiUrl}/api/session/current`)
     .then((response) => {
         response.json().then(data => {
             bannerPersonalData(data);
             const cartId = data.cart; // Se asume que la propiedad cart contiene la ID del carrito
             // Obtener productos del carrito usando la ID del carrito
-            fetch(`http://localhost:8080/api/carts/${cartId}`)
+            fetch(`${apiUrl}/api/carts/${cartId}`)
                 .then((response) => {
                     response.json().then(data => {
                         render(data.products);
@@ -79,17 +92,17 @@ fetch('http://localhost:8080/api/session/current')
 
     function explorarProductos() {
         // Redirigir a la página de productos
-        window.location.href = 'http://localhost:8080/products';
+        window.location.href = `${apiUrl}/products`;
     }
 
     function realizarCompra() {
         // Obtener la ID del carrito
-        fetch('http://localhost:8080/api/session/current')
+        fetch(`${apiUrl}/api/session/current`)
             .then(response => response.json())
             .then(data => {
                 const cartId = data.cart;
                 // Realizar la solicitud POST al endpoint de compra del carrito
-                fetch(`http://localhost:8080/api/carts/${cartId}/purchase`, {
+                fetch(`${apiUrl}/api/carts/${cartId}/purchase`, {
                     method: 'POST',
                 })
                 .then(response => response.json())
@@ -122,7 +135,7 @@ fetch('http://localhost:8080/api/session/current')
                 <p class=" text-2xl text-green-500"> Codigo de compra = ${data.data.code}</p>
                 <p class=" text-2xl text-green-500"> Fecha de compra = ${data.data.purchase_datetime}</p>
                 <p class=" text-2xl text-green-500"> A nombre de = ${data.data.purchaser}</p>
-                <button onclick="window.location.href = 'http://localhost:8080/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
+                <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
             </div>
             
             `;

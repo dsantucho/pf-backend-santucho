@@ -5,7 +5,7 @@ const userModel = require('../modules/user.model');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
 const Cart = require ('../dao/CartDao');
 
-const initializePassport = () => {
+const initializePassport = (port) => {
 
     passport.use('register', new LocalStrategy(
         { usernameField: 'email', passReqToCallback: true },
@@ -61,7 +61,7 @@ const initializePassport = () => {
         {
             clientID: "Iv1.6f63f75dca38a45a",
             clientSecret: "5ffa1794537db2a5362eaa9cf5b25ad0e9fbf6fd",
-            callbackURL: "http://localhost:8080/auth/callbackGithub"
+            callbackURL: `http://localhost:${port}/auth/callbackGithub`
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
@@ -80,6 +80,7 @@ const initializePassport = () => {
                     })
 
                 }
+                console.log('USER GIT:', user)
                 return done(null, user);
             } catch (err) {
                 return done(err);
