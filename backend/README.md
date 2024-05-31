@@ -19,5 +19,6 @@ USER ADMIN = dsantucho@hotmail.com // 123456
 PRIMIUM PROFILE = premium@test.com // 123456
 USER PROFILE = chimu@test.com // 123456
 
-Test Mocha: 
+Test: 
 Directorio: backend/test
+correr: npm test
