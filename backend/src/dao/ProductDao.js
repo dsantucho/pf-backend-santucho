@@ -11,25 +11,25 @@ class ProductManager {
         this.products = [];
     }
 
-// -- GET ALL PRODUCTS Devolver todos mis productos --
+    // -- GET ALL PRODUCTS Devolver todos mis productos --
     async getProducts() {
-        try{
+        try {
             let respBD = await Products.find();
             return respBD
-        }catch (err){
+        } catch (err) {
             return err
         }
     }
-// --  ADD producto --
+    // --  ADD producto --
     async addProduct(body) {
-        try{
+        try {
             let newProduct = await Products.create(body)
-             return newProduct
-         }catch (err){
-             return err
-         }
+            return newProduct
+        } catch (err) {
+            return err
+        }
     }
-//-- GET BY ID -- 
+    //-- GET BY ID -- 
     async getProductById(idSearch) {
         try {
             // Obtener el producto usando BD
@@ -40,30 +40,51 @@ class ProductManager {
             return error
         }
     }
-// -- UPDATE un producto segun su ID [no se modifica] --
-async updateProduct(_id, updatedFields) {
-    try {
-        const productExist =  await this.getProductById(_id)
-        console.log("PRODUCTO DAO EXISTE = ", productExist)
-        const result = await Products.updateOne(_id, updatedFields);
-        if (result.nModified === 1) {
-            // Si se modificó correctamente, devolver el producto actualizado
-            return await this.getProductById(_id);
-        } else {
-            // Si no se modificó ningún documento, devolver un mensaje de error
-            throw new Error('El producto no fue encontrado o no se modificó correctamente.');
+    // -- UPDATE un producto segun su ID [no se modifica] --
+    /* async updateProduct(_id, updatedFields) {
+        try {
+            const productExist =  await this.getProductById(_id)
+            console.log("PRODUCTO DAO EXISTE = ", productExist)
+            const result = await Products.updateOne(_id, updatedFields);
+            if (result.nModified === 1) {
+                // Si se modificó correctamente, devolver el producto actualizado
+                return await this.getProductById(_id);
+            } else {
+                // Si no se modificó ningún documento, devolver un mensaje de error
+                throw new Error('El producto no fue encontrado o no se modificó correctamente.');
+            }
+        } catch (err) {
+            // Manejar errores de MongoDB
+            return err;
         }
-    } catch (err) {
-        // Manejar errores de MongoDB
-        return err;
+    } */
+    async updateProduct(_id, updatedFields) {
+        try {
+            const productExist = await this.getProductById(_id);
+            console.log("PRODUCTO DAO EXISTE = ", productExist);
+            if (!productExist) {
+                throw new Error('El producto no fue encontrado.');
+            }
+            const result = await Products.updateOne({ _id: productExist._id }, { $set: updatedFields });
+            if (result.nModified === 1 || result.modifiedCount === 1) {
+                // Si se modificó correctamente, devolver el producto actualizado
+                return await this.getProductById(_id);
+            } else {
+                // Si no se modificó ningún documento, devolver un mensaje de error
+                throw new Error('El producto no se modificó correctamente.');
+            }
+        } catch (err) {
+            // Manejar errores de MongoDB
+            return err;
+        }
     }
-}
-// -- DELETE --
+
+    // -- DELETE --
     async deleteProduct(id) {
-        try{
+        try {
             const result = await Products.deleteOne(id)
             return result
-        }catch(err){
+        } catch (err) {
             return err
         }
     }

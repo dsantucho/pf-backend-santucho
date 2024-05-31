@@ -4,19 +4,20 @@ const express = require('express');
 //BD
 const Products = require('../modules/product.model.js')
 //middelware
-const {isAdmin, isUser, isAuthenticated, isPremium, isAdminOrPremium} = require('../middlewares/auth.middleware.js');
+const { isAdmin, isUser, isAuthenticated, isPremium, isAdminOrPremium } = require('../middlewares/auth.middleware.js');
 //const {middleware} = require('../utils/errors/middlewares/index.js')
 //FAKER
 const { generateProducts } = require('../mocks/products.mocks.js')
-const {getAllProducts, postAddProduct, updateProduct, deleteProduct} = require('../controllers/product.controller.js');
+const { getAllProducts, postAddProduct, updateProduct, deleteProduct } = require('../controllers/product.controller.js');
 
 const { Router } = express
 const routerProd = new Router()
 const product = new ProductManager(); //instancio productManager
 routerProd.use(require('../utils/errors/middlewares/index.js')); // usa el middleware directamente
+
 //CRUD de productos
 //La ruta raíz GET / deberá listar todos los productos de la base. (Incluyendo la limitación ?limit del desafío anterior
-routerProd.get('/',isAuthenticated, getAllProducts);
+routerProd.get('/', isAuthenticated, getAllProducts);
 
 //MOCK FAKER
 routerProd.get('/mockingproducts', async (req, res) => {
@@ -30,10 +31,10 @@ routerProd.get('/mockingproducts', async (req, res) => {
     } catch (error) {
         res.status(500).json({ status: 'error', error: error.message });
     }
-  });
+});
 
 //La ruta GET /:pid deberá traer sólo el producto con el id proporcionado
-routerProd.get('/:pid',isAuthenticated, async (req, res) => {
+routerProd.get('/:pid', isAuthenticated, async (req, res) => {
     try {
         // Obtener el product Id desde req.params
         const productId = req.params.pid;
@@ -49,17 +50,14 @@ routerProd.get('/:pid',isAuthenticated, async (req, res) => {
     }
 })
 
-/* La ruta raíz POST / deberá agregar un nuevo producto con los campos:
-
- */
 //DONE
-routerProd.post('/',isAdminOrPremium, postAddProduct);
+routerProd.post('/', isAdminOrPremium, postAddProduct);
 
 //DONE La ruta PUT /:pid deberá tomar un producto y actualizarlo por los campos enviados desde body. NUNCA se debe actualizar o eliminar el id al momento de hacer dicha actualización.
-routerProd.put('/:pid',isAdminOrPremium, updateProduct);
+routerProd.put('/:pid', isAdminOrPremium, updateProduct);
 
 //DONE La ruta DELETE /:pid deberá eliminar el producto con el pid indicado. 
-routerProd.delete('/:pid',isAdminOrPremium, deleteProduct)
+routerProd.delete('/:pid', isAdminOrPremium, deleteProduct)
 
 
 

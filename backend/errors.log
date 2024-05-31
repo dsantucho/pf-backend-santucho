@@ -3,3 +3,7 @@
 {"level":"info","message":"Este es un mensaje de info"}
 {"level":"warning","message":"Este es un mensaje de warning"}
 {"level":"error","message":"Este es un mensaje de error"}
+{"level":"http","message":"POST en /auth/login - at 5/30/2024"}
+{"level":"warning","message":"POST en /auth/login - at 5/30/2024"}
+{"level":"http","message":"POST en /auth/login - at 5/30/2024"}
+{"level":"warning","message":"POST en /auth/login - at 5/30/2024"}

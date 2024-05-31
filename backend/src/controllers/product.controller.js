@@ -1,13 +1,13 @@
 const CustomError = require('../utils/errors/CustomError');
 const EErrors = require('../utils/errors/EErrors');
-const {generateProductErrorInfoSP} = require('../utils/errors/Info');
+const { generateProductErrorInfoSP } = require('../utils/errors/Info');
 const ProductManager = require('../dao/ProductDao.js');
 //BD
 const Products = require('../modules/product.model.js')
 
 const product = new ProductManager(); //instancio productManager
 
-const  getAllProducts = async (req,res)=>{
+const getAllProducts = async (req, res) => {
     try {
         // Obtener el límite de resultados desde los query parameters
         // el 10 le indica al parseInt su base
@@ -19,16 +19,16 @@ const  getAllProducts = async (req,res)=>{
 
         const query = {
             ...(categoryQuery ? { category: categoryQuery } : {}),
-          };
+        };
 
         let options = {
             status: statusQuery,
             sort: { price: sortQuery },
-            limit:limitQuery, 
-            page:pageQuery 
+            limit: limitQuery,
+            page: pageQuery
         }
 
-        let resultPaginate = await Products.paginate(query,options)
+        let resultPaginate = await Products.paginate(query, options)
         res.json({
             status: 'success',
             payload: resultPaginate.docs,
@@ -38,15 +38,15 @@ const  getAllProducts = async (req,res)=>{
             page: resultPaginate.page,
             hasPrevPage: resultPaginate.hasPrevPage,
             hasNextPage: resultPaginate.hasNextPage,
-    
-            prevLink: resultPaginate.prevPage ? `/api/products?page=${resultPaginate.prevPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery }` : null,
-            nextLink: resultPaginate.nextPage ? `/api/products?page=${resultPaginate.nextPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery }` : null,
-            
+
+            prevLink: resultPaginate.prevPage ? `/api/products?page=${resultPaginate.prevPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery}` : null,
+            nextLink: resultPaginate.nextPage ? `/api/products?page=${resultPaginate.nextPage}&limit=${limitQuery}&sort=${sortQuery}&status=${statusQuery}&category=${categoryQuery}` : null,
+
             totalItems: resultPaginate.totalDocs,
-            currentPage: resultPaginate.page,   
-          });
+            currentPage: resultPaginate.page,
+        });
     } catch (error) {
-      res.status(500).json({ status: 'error', error: error.message });
+        res.status(500).json({ status: 'error', error: error.message });
     }
 }
 const postAddProduct = async (req, res) => {
@@ -86,7 +86,11 @@ const updateProduct = async (req, res) => {
     const dataReplace = req.body;
 
     try {
-        const conf = await product.updateProduct({ _id: productId }, dataReplace);
+        const conf = await product.updateProduct(productId, dataReplace);
+        console.log('CONF: ', conf)
+        if (conf instanceof Error) {
+            throw conf;
+        }
         res.status(200).send(conf);
     } catch (err) {
         res.status(404).send(err);
@@ -114,4 +118,4 @@ const deleteProduct = async (req, res) => {
         res.status(404).send(err);
     }
 }
-module.exports = {getAllProducts, postAddProduct, updateProduct, deleteProduct}
+module.exports = { getAllProducts, postAddProduct, updateProduct, deleteProduct }

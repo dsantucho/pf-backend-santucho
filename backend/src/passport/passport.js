@@ -3,7 +3,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const github = require('passport-github2')
 const userModel = require('../modules/user.model');
 const { createHash, isValidatePassword } = require('../utils/bcrypts');
-const Cart = require ('../dao/CartDao');
+const Cart = require('../dao/CartDao');
 
 const initializePassport = (port) => {
 
@@ -34,7 +34,7 @@ const initializePassport = (port) => {
             }
         }
     ));
-    
+
     passport.use('login', new LocalStrategy(
         { usernameField: 'email', passwordField: 'password' },
         async (email, password, done) => {
@@ -44,18 +44,18 @@ const initializePassport = (port) => {
                 if (!user) {
                     return done(null, false, { message: 'Usuario no encontrado' });
                 }
-    
+
                 if (!isValidatePassword(user, password)) {
                     return done(null, false, { message: 'Contraseña incorrecta' });
                 }
-    
+                console.log('PASSPORT USER: ', user)
                 return done(null, user);
             } catch (err) {
                 return done(err);
             }
         }
     ));
-    
+
 
     passport.use('github', new github.Strategy(
         {
@@ -65,9 +65,9 @@ const initializePassport = (port) => {
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
-                let {login, name, type} = profile._json;
+                let { login, name, type } = profile._json;
                 let user = await userModel.findOne({ username: login });
-                if(!user){
+                if (!user) {
                     //registro
                     let newCart = new Cart();
                     user = await userModel.create({
@@ -76,7 +76,7 @@ const initializePassport = (port) => {
                         //password: createHash(newData.password),
                         rol: type,
                         github: profile,
-                        
+
                     })
 
                 }
