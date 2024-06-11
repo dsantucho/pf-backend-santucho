@@ -12,6 +12,7 @@ const routerAuth = require("./routes/auth.routes.js")
 const uiRouter = require("./routes/app.routes.js");
 const routerSession = require("./routes/session.routes.js");
 const userRouter = require("./routes/user.routes.js")
+const documentRouter = require("./routes/documents.routes.js")
 const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
@@ -103,6 +104,7 @@ app.use('/api/carts/', routerCart)
 app.use('/auth/', routerAuth)
 app.use('/api/session/', routerSession)
 app.use('/api/users', userRouter);
+app.use('/api/documents', documentRouter);
 const swaggerOptions = {
   definition: {
     openapi: "3.0.1",

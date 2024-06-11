@@ -7,55 +7,59 @@ const Cart = require('../dao/CartDao');
 
 const initializePassport = (port) => {
 
-    passport.use('register', new LocalStrategy(
-        { usernameField: 'email', passReqToCallback: true },
-        async (req, email, password, done) => {
-            try {
-                let newData = req.body;
-                let newCart = new Cart();
-                let user = await userModel.findOne({ email: email });
-                if (user) {
-                    done('Error, usuario ya existe', false)
-                }
-                let newUser = {
-                    first_name: newData.first_name,
-                    last_name: newData.last_name,
-                    email: email, // Utilizamos el email proporcionado en la estrategia
-                    age: newData.age,
-                    password: createHash(password), // Usamos la contraseña proporcionada en la estrategia
-                    cart: await newCart.createCart(),
-                    role: newData.role
-                }
-                let result = await userModel.create(newUser);
-                done(null, result);
-                console.log('result: ', result);
-            } catch (err) {
-                done('Error al crear el usuario' + err);
+// Estrategia de registro
+passport.use('register', new LocalStrategy(
+    { usernameField: 'email', passReqToCallback: true },
+    async (req, email, password, done) => {
+        try {
+            let newData = req.body;
+            let newCart = new Cart();
+            let user = await userModel.findOne({ email: email });
+            if (user) {
+                return done(null, false, { message: 'Usuario ya existe' });
             }
+            let newUser = {
+                first_name: newData.first_name,
+                last_name: newData.last_name,
+                email: email, // Utilizamos el email proporcionado en la estrategia
+                age: newData.age,
+                password: createHash(password), // Usamos la contraseña proporcionada en la estrategia
+                cart: await newCart.createCart(),
+                role: newData.role,
+                last_connection: null // Inicialmente vacío o null
+            };
+            let result = await userModel.create(newUser);
+            return done(null, result);
+        } catch (err) {
+            return done(err);
         }
-    ));
+    }
+));
 
-    passport.use('login', new LocalStrategy(
-        { usernameField: 'email', passwordField: 'password' },
-        async (email, password, done) => {
-            console.log('entro al passport')
-            try {
-                let user = await userModel.findOne({ email: email });
-                if (!user) {
-                    return done(null, false, { message: 'Usuario no encontrado' });
-                }
-
-                if (!isValidatePassword(user, password)) {
-                    return done(null, false, { message: 'Contraseña incorrecta' });
-                }
-                console.log('PASSPORT USER: ', user)
-                return done(null, user);
-            } catch (err) {
-                return done(err);
+// Estrategia de login
+passport.use('login', new LocalStrategy(
+    { usernameField: 'email', passwordField: 'password' },
+    async (email, password, done) => {
+        try {
+            let user = await userModel.findOne({ email: email });
+            if (!user) {
+                return done(null, false, { message: 'Usuario no encontrado' });
             }
-        }
-    ));
 
+            if (!isValidatePassword(user, password)) {
+                return done(null, false, { message: 'Contraseña incorrecta' });
+            }
+
+            // Actualizar last_connection al momento de login
+            user.last_connection = new Date();
+            await user.save();
+
+            return done(null, user);
+        } catch (err) {
+            return done(err);
+        }
+    }
+));
 
     passport.use('github', new github.Strategy(
         {

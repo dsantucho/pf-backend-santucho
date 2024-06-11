@@ -12,7 +12,7 @@ describe('Testing Carts API', () => {
     // Registro y login de usuario antes de los tests
     before(async () => {
         const mockUser = {
-            email: 'dsantucho@hotmail.com',
+            email: 'soledadsantucho@hotmail.com',
             password: '123456'
         };
 

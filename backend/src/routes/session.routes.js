@@ -22,7 +22,9 @@ routerSession.get('/current', async (req, res) => {
                 "email": user.email,
                 "age": user.age,
                 "cart": user.cart,
-                "role": user.role
+                "role": user.role,
+                "last_connection": user.last_connection,
+                "documents": user.documents
             });
         }else{
             // Si el usuario no se encuentra en la sesión, devuelve un error

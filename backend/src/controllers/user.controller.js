@@ -1,5 +1,5 @@
 const User = require('../modules/user.model');
-const Cart = require('../dao/CartDao')
+const Cart = require('../dao/CartDao');
 
 const changeUserRole = async (req, res) => {
     try {
@@ -34,8 +34,56 @@ const getUsers = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+const updateUserDocuments = async (req, res) => {
+    try {
+        const userId = req.params.uid;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Agregar los documentos subidos al campo 'documents' del usuario
+        req.files.forEach(file => {
+            user.documents.push({ name: file.originalname, reference: file.path });
+        });
+
+        await user.save();
+
+        res.status(200).json({ message: 'Documentos actualizados', documents: user.documents });
+    } catch (error) {
+        console.error('Error al actualizar los documentos del usuario:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+const updateUserProfileImage = async (req, res) => {
+    console.log('req.baseUrl: ', req.baseUrl)
+    try {
+        const userId = req.params.uid;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+        console.log('req.file: ',req.file)
+        if (!req.file) {
+            return res.status(400).json({ message: 'No se ha subido ningún archivo' });
+        }
+        console.log('req.file.path: ', req.file.path)
+        user.profileImage = req.file.path;
+        await user.save();
+
+        res.status(200).json({ message: 'Imagen de perfil actualizada', profileImage: user.profileImage });
+    } catch (error) {
+        console.error('Error al actualizar la imagen de perfil:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
 
 module.exports = {
     changeUserRole,
-    getUsers
+    getUsers,
+    updateUserDocuments,
+    updateUserProfileImage
 };

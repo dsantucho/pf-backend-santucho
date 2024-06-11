@@ -8,7 +8,8 @@ const { isAdmin, isUser, isAuthenticated, isPremium, isAdminOrPremium } = requir
 //const {middleware} = require('../utils/errors/middlewares/index.js')
 //FAKER
 const { generateProducts } = require('../mocks/products.mocks.js')
-const { getAllProducts, postAddProduct, updateProduct, deleteProduct } = require('../controllers/product.controller.js');
+const { getAllProducts, postAddProduct, updateProduct, deleteProduct, updateProductImage } = require('../controllers/product.controller.js');
+const upload = require('../config/multerConfig');
 
 const { Router } = express
 const routerProd = new Router()
@@ -59,8 +60,8 @@ routerProd.put('/:pid', isAdminOrPremium, updateProduct);
 //DONE La ruta DELETE /:pid deberá eliminar el producto con el pid indicado. 
 routerProd.delete('/:pid', isAdminOrPremium, deleteProduct)
 
-
-
+// Ruta para actualizar la imagen del producto
+routerProd.post('/image/:pid', isAdminOrPremium, upload.single('productImage'), updateProductImage);
 
 module.exports = routerProd;
 

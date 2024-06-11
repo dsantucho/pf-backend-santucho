@@ -23,10 +23,10 @@ const UserSchema = new mongoose.Schema(
             //require: true
         },
         //cart:Id con referencia a Carts
-        cart: {  
+        cart: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'carts',
-            required: true 
+            required: true
         },
         role: {
             type: String,
@@ -39,6 +39,21 @@ const UserSchema = new mongoose.Schema(
             type: String
         },
         resetPasswordExpires: {
+            type: Date
+        },
+        documents: [
+            {
+                name: {
+                    type: String,
+                    required: true
+                },
+                reference: {
+                    type: String,
+                    required: true
+                }
+            }
+        ],
+        last_connection: {
             type: Date
         }
     },

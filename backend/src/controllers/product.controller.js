@@ -118,4 +118,26 @@ const deleteProduct = async (req, res) => {
         res.status(404).send(err);
     }
 }
-module.exports = { getAllProducts, postAddProduct, updateProduct, deleteProduct }
+
+const updateProductImage = async (req, res) => {
+    const productId = req.params.pid; // Obtener el ID del producto desde los parámetros de la URL
+    const imagePath = req.file.path; // Ruta del archivo subido
+
+    try {
+        const product = await Products.findById(productId);
+        console.log(product)
+
+        if (!product) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+
+        product.image = imagePath; // Suponiendo que tienes un campo 'image' en tu modelo de producto
+        await product.save();
+
+        res.status(200).json({ message: 'Imagen del producto actualizada', product });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getAllProducts, postAddProduct, updateProduct, deleteProduct, updateProductImage };

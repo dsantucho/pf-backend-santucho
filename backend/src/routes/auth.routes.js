@@ -18,25 +18,52 @@ router.post('/register',
 router.get('/error', (req, res) => {
     res.send('error registro user');
 })
+
 router.post('/login',
     passport.authenticate('login', { failureRedirect: '/error' }),
     (req, res) => {
-        req.session.usuario=req.user
+        req.session.usuario = req.user;
         res.redirect(`/products`);
-    });
+    }
+);
 
-router.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) res.send('error en logout')
-    })
-    res.redirect('/login-view')
+router.get('/logout', async (req, res) => {
+    if (!req.user) {
+        return res.redirect('/login-view');
+    }
+
+    try {
+        // Vuelve a cargar el usuario desde la base de datos
+        const user = await userModel.findById(req.user._id); // Usar userModel en lugar de User
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Actualiza la última conexión
+        user.last_connection = new Date();
+        await user.save();
+
+        // Destruye la sesión
+        req.session.destroy(err => {
+            if (err) {
+                return res.send('error en logout');
+            }
+
+            res.redirect('/login-view');
+        });
+    } catch (err) {
+        console.error('Error al actualizar last_connection:', err);
+        res.status(500).send('Error en el logout');
+    }
 });
 
-router.get('/github', passport.authenticate("github", {}), (req,res)=>{})
 
-router.get('/callbackGithub', passport.authenticate("github", {}), (req,res)=>{
+router.get('/github', passport.authenticate("github", {}), (req, res) => { })
 
-    req.session.usuario=req.user
+router.get('/callbackGithub', passport.authenticate("github", {}), (req, res) => {
+
+    req.session.usuario = req.user
 
     //res.setHeader('Content-Type','application/json');
     //res.status(200).json({payload:req.user});

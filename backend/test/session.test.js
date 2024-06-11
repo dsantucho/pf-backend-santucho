@@ -10,7 +10,7 @@ describe('Testing Session API', () => {
     // Registro y login de usuario antes de los tests
     before(async () => {
         const mockUser = {
-            email: 'dsantucho@hotmail.com',
+            email: 'soledadsantucho@hotmail.com',
             password: '123456'
         };
 
@@ -28,7 +28,7 @@ describe('Testing Session API', () => {
 
         expect(res.statusCode).to.equal(200);
         expect(res.body).to.be.an('object');
-        expect(res.body).to.have.property('email').eql('dsantucho@hotmail.com');
+        expect(res.body).to.have.property('email').eql('soledadsantucho@hotmail.com');
     });
 
     // Test para obtener el usuario actual sin sesión

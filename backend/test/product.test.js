@@ -22,7 +22,7 @@ describe('Testing Products API', () => {
     // Registro y login de usuario antes de los tests
     before(async () => {
         const mockUser = {
-            email: 'dsantucho@hotmail.com',
+            email: 'soledadsantucho@hotmail.com',
             password: '123456',
             //role: 'admin' // o 'premium' dependiendo de tus pruebas
         };
