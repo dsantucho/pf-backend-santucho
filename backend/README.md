@@ -23,7 +23,7 @@ Test:
 Directorio: backend/test
 correr: npm test
 
-
+------ ENTREGA 13-06-26 ------
 Multer:
 
 curl de login user admin 
@@ -63,9 +63,32 @@ curl --location 'http://localhost:8080/api/users/profile/image/66636d834a7664320
     - precondicion: relazar el login
     - editar el connect.sid [en header value Cookie]
     - endpoint se forma con: url api/document/<id user valido>
-    - en postman tenemos la key documents para subir el documento [en body]
+    - en postman body vas a ver:
+        - documentName = tiene que ir un nombre correcto entre ['identificacion', 'comprobante_domicilio', 'estado_cuenta', 'otros'];
+        - documents = subir el documento, aqui puede ser cualquiera y puede tener cualquier nombre. Lo importante es el documentName este dentro de la categoria. 
 
 Curl ejemplo:
 curl --location 'http://localhost:8080/api/documents/66636d834a76643204f42732' \
---header 'Cookie: connect.sid=s%3AqjTeGMiSX41yg-g4QxstJ0orTbd2PDPB.bF0Uqg0tDZOyabkf9rJw7GdWlD1DduimFspF%2FHFyFqA; connect.sid=s%3AqjTeGMiSX41yg-g4QxstJ0orTbd2PDPB.bF0Uqg0tDZOyabkf9rJw7GdWlD1DduimFspF%2FHFyFqA; connect.sid=s%3AqjTeGMiSX41yg-g4QxstJ0orTbd2PDPB.bF0Uqg0tDZOyabkf9rJw7GdWlD1DduimFspF%2FHFyFqA' \
---form 'documents=@"/Users/danielasoledadsantucho/Desktop/Liderazgo y Gestalt.pdf"'
+--header 'Cookie: connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw; connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw' \
+--form 'documentName="identificacion"' \
+--form 'documents=@"/Users/danielasoledadsantucho/Desktop/comprobante_domicilio.pdf"'
+
+En Mongo se esta guardando en users>
+documents
+    >Object
+        >name: "comprobante_domicilio"
+        >reference"/Users/danielasoledadsantucho/Desktop/repos/pf-backend/backend/src/pub…"
+        >_id: 666af53c3d0178ec0649f0b6"
+
+Cambio de usuario a premium: 
+1 - Test User sin documentos: 
+curl --location --request PUT 'http://localhost:8080/api/users/premium/666b3cd687c6a10211d0f0c0' \
+--header 'Cookie: connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw; connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw'
+
+2 - User que le falta 1 documento
+curl --location --request PUT 'http://localhost:8080/api/users/premium/666b3ac3634f329fbed17437' \
+--header 'Cookie: connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw; connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw'
+
+3 - User con todos los documentos cargados. 
+curl --location --request PUT 'http://localhost:8080/api/users/premium/666b3d1887c6a10211d0f0c6' \
+--header 'Cookie: connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw; connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw'

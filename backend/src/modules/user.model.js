@@ -45,7 +45,8 @@ const UserSchema = new mongoose.Schema(
             {
                 name: {
                     type: String,
-                    required: true
+                    required: true,
+                    enum: ['identificacion', 'comprobante_domicilio', 'estado_cuenta', 'otros']
                 },
                 reference: {
                     type: String,
