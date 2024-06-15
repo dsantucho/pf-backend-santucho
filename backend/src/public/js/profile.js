@@ -1,5 +1,6 @@
+document.addEventListener('DOMContentLoaded', function() {
 let apiUrl = '';
-// ** FETCH ${apiUrl} **
+
 // Obtener la configuración del servidor y luego ejecutar las funciones necesarias
 fetch('/api/config')
     .then(response => response.json())
@@ -11,18 +12,6 @@ fetch('/api/config')
         console.error('Error al obtener la configuración del servidor:', error);
     });
 
-function bannerPersonalData (data){
-    document.getElementById('bannerPersonalData').innerHTML = 
-       (`
-       <h1 class ="text-4xl tracking-wide font-sans" >User Profile</h1>
-       <h1 class="text-2xl tracking-wide font-sans">Nombre: ${data.email}!</h1>
-       <p  class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
-       <p class = "text-2xl tracking-wide font-sans">Mi Carrito = ${data.cart} </p>
-       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="/auth/logout">Logout</a>
-       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="${apiUrl}/products">Ir a Productos</a>
-
-      `) 
-  }
 
   function render(data) {
     const cartListElement = document.getElementById('cartList');
@@ -161,4 +150,4 @@ fetch(`${apiUrl}/api/session/current`)
     }
     
 
-
+});

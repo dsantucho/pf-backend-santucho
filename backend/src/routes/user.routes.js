@@ -5,7 +5,7 @@ const { isAdmin, isAuthenticated } = require('../middlewares/auth.middleware.js'
 const upload = require('../config/multerConfig.js'); 
 const router = new Router();
 
-const { changeUserRole, getUsers, updateUserProfileImage, deleteInactiveUsers } = require('../controllers/user.controller');
+const { changeUserRole, getUsers, updateUserProfileImage, deleteInactiveUsers, deleteUser } = require('../controllers/user.controller');
 
 // Ruta para cambiar el rol del usuario
 router.put('/premium/:uid', isAuthenticated, isAdmin, changeUserRole);
@@ -18,6 +18,7 @@ router.post('/profile/image/:uid', isAuthenticated, upload.single('profileImage'
 
 // Ruta para eliminar usuarios inactivos
 router.delete('/', isAuthenticated, isAdmin, deleteInactiveUsers);
-
+// Ruta para eliminar un usuario
+router.delete('/:uid', isAuthenticated, isAdmin, deleteUser);
 
 module.exports = router;

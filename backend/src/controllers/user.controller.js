@@ -130,11 +130,28 @@ const deleteInactiveUsers = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+const deleteUser = async (req, res) => {
+    try {
+        const userId = req.params.uid;
+        const user = await User.findByIdAndDelete(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.status(200).json({ message: 'Usuario eliminado' });
+    } catch (error) {
+        console.error('Error al eliminar el usuario:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
 
 module.exports = {
     changeUserRole,
     getUsers,
     updateUserDocuments,
     updateUserProfileImage,
-    deleteInactiveUsers
+    deleteInactiveUsers,
+    deleteUser
 };

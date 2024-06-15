@@ -22,6 +22,11 @@ router.get('/carts/:cid',isAuthenticated, async (req, res)=>{
   res.render('cart',{cartId});
 }) 
 
+// Ruta para la vista de administración de usuarios
+router.get('/admin/users', isAuthenticated, isAdmin, (req, res) => {
+  res.render('adminUsers');
+});
+
 /* router.get('/realtimeProducts', async (req, res)=>{
   // Renderizar la vista home.handlebars y pasarle la lista de productos
   res.render('realtimeProducts',{});
