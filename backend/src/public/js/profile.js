@@ -1,29 +1,50 @@
-document.addEventListener('DOMContentLoaded', function() {
-let apiUrl = '';
+document.addEventListener('DOMContentLoaded', function () {
+    let apiUrl = '';
 
-// Obtener la configuración del servidor y luego ejecutar las funciones necesarias
-fetch('/api/config')
-    .then(response => response.json())
-    .then(config => {
-        apiUrl = `http://localhost:${config.apiUrl}`;
-        console.log(apiUrl)
-    })
-    .catch(error => {
-        console.error('Error al obtener la configuración del servidor:', error);
-    });
+    // Obtener la configuración del servidor y luego ejecutar las funciones necesarias
+    fetch('/api/config')
+        .then(response => response.json())
+        .then(config => {
+            apiUrl = `http://localhost:${config.apiUrl}`;
+            console.log(apiUrl)
+        })
+        .catch(error => {
+            console.error('Error al obtener la configuración del servidor:', error);
+        });
+
+    // Obtener información del usuario actual
+    fetch(`${apiUrl}/api/session/current`)
+        .then((response) => {
+            response.json().then(data => {
+                const cartId = data.cart; // Se asume que la propiedad cart contiene la ID del carrito
+                // Obtener productos del carrito usando la ID del carrito
+                fetch(`${apiUrl}/api/carts/${cartId}`)
+                    .then((response) => {
+                        response.json().then(data => {
+                            render(data.products);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener productos del carrito:', error);
+                    });
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener información del usuario actual:', error);
+        });
 
 
-  function render(data) {
-    const cartListElement = document.getElementById('cartList');
-    
-    if (data.length === 0) {
-        // Si no hay productos en el carrito, mostrar un mensaje y un botón para ir a la página de productos
-        cartListElement.innerHTML = `
+    function render(data) {
+        const cartListElement = document.getElementById('cartList');
+
+        if (data.length === 0) {
+            // Si no hay productos en el carrito, mostrar un mensaje y un botón para ir a la página de productos
+            cartListElement.innerHTML = `
             <div class="text-center">
                 <p class="text-xl font-bold">No hay productos en tu carrito</p>
                 <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
             </div>`;
-    } else {
+        } else {
             // Si hay productos en el carrito, generar el HTML para mostrar los productos
             let html = '';
             data.forEach(elem => {
@@ -44,7 +65,7 @@ fetch('/api/config')
                         </button>
                     </div>`;
             });
-          
+
             // Agregar el botón "Comprar" arriba de la lista de productos
             html = `
                 <div class="">
@@ -52,36 +73,9 @@ fetch('/api/config')
                 <button onclick="explorarProductos()" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
                 </div>
                 ${html}`;
-      
-        cartListElement.innerHTML = html;
-    }
-}
 
-// Obtener información del usuario actual
-fetch(`${apiUrl}/api/session/current`)
-    .then((response) => {
-        response.json().then(data => {
-            bannerPersonalData(data);
-            const cartId = data.cart; // Se asume que la propiedad cart contiene la ID del carrito
-            // Obtener productos del carrito usando la ID del carrito
-            fetch(`${apiUrl}/api/carts/${cartId}`)
-                .then((response) => {
-                    response.json().then(data => {
-                        render(data.products);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error al obtener productos del carrito:', error);
-                });
-        });
-    })
-    .catch(error => {
-        console.error('Error al obtener información del usuario actual:', error);
-    });
-
-    function explorarProductos() {
-        // Redirigir a la página de productos
-        window.location.href = `${apiUrl}/products`;
+            cartListElement.innerHTML = html;
+        }
     }
 
     function realizarCompra() {
@@ -94,15 +88,15 @@ fetch(`${apiUrl}/api/session/current`)
                 fetch(`${apiUrl}/api/carts/${cartId}/purchase`, {
                     method: 'POST',
                 })
-                .then(response => response.json())
-                .then(data => {
-                    // Manejar la respuesta del servidor (puede mostrar un mensaje de éxito o error)
-                    // Mostrar el mensaje de banner y la lista de productos no comprados
-                    mostrarMensajeCompra(data);
-                })
-                .catch(error => {
-                    console.error('Error al realizar la compra:', error);
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        // Manejar la respuesta del servidor (puede mostrar un mensaje de éxito o error)
+                        // Mostrar el mensaje de banner y la lista de productos no comprados
+                        mostrarMensajeCompra(data);
+                    })
+                    .catch(error => {
+                        console.error('Error al realizar la compra:', error);
+                    });
             })
             .catch(error => {
                 console.error('Error al obtener la información del usuario:', error);
@@ -112,7 +106,7 @@ fetch(`${apiUrl}/api/session/current`)
     function mostrarMensajeCompra(data) {
         const bannerElement = document.getElementById('bannerCompra');
         bannerElement.innerHTML = '';
-    
+
         if (data.message) {
             // Limpiar la lista del carrito
             const cartListElement = document.getElementById('cartList');
@@ -132,22 +126,25 @@ fetch(`${apiUrl}/api/session/current`)
             // Mostrar el mensaje de error
             bannerElement.innerHTML = `<h2 class="text-red-500">${data.error}</h2>`;
         }
-    
-/*         if (data.productsNotProcessed && data.productsNotProcessed.length > 0) {
-            // Mostrar la lista de productos no comprados
-            const productListElement = document.createElement('ul');
-            productListElement.classList.add('text-red-500');
-            productListElement.innerHTML = '<h3>Productos no comprados:</h3>';
-    
-            data.productsNotProcessed.forEach(productId => {
-                const listItem = document.createElement('li');
-                listItem.textContent = productId;
-                productListElement.appendChild(listItem);
-            });
-    
-            bannerElement.appendChild(productListElement);
-        } */
-    }
-    
 
+        /*         if (data.productsNotProcessed && data.productsNotProcessed.length > 0) {
+                    // Mostrar la lista de productos no comprados
+                    const productListElement = document.createElement('ul');
+                    productListElement.classList.add('text-red-500');
+                    productListElement.innerHTML = '<h3>Productos no comprados:</h3>';
+            
+                    data.productsNotProcessed.forEach(productId => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = productId;
+                        productListElement.appendChild(listItem);
+                    });
+            
+                    bannerElement.appendChild(productListElement);
+                } */
+    }
 });
+
+function explorarProductos() {
+    // Redirigir a la página de productos
+    window.location.href = `${apiUrl}/products`;
+}
