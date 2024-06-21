@@ -3,7 +3,10 @@ const EErrors = require('../utils/errors/EErrors');
 const { generateProductErrorInfoSP } = require('../utils/errors/Info');
 const ProductManager = require('../dao/ProductDao.js');
 //BD
-const Products = require('../modules/product.model.js')
+const Products = require('../modules/product.model.js');
+const User = require("../modules/user.model.js")
+const nodemailer = require("nodemailer");
+const transporter = require('../config/email/mailing');
 
 const product = new ProductManager(); //instancio productManager
 
@@ -53,15 +56,15 @@ const postAddProduct = async (req, res) => {
     const { title, price, code, stock, category } = req.body;
 
     try {
-        let owner;
-        // Verificar si el usuario es premium
+        let owner = req.user._id; // siempre guardo el id del owner para luego hacer un populate
+/*         // Verificar si el usuario es premium
         if (req.user && req.user.role === 'premium') {
             // Si es premium, el propietario será su ID
             owner = req.user._id;
         } else {
             // Si no es premium, el propietario será 'ADMIN' por defecto
             owner = 'admin';
-        }
+        } */
 
         // Verificar si faltan datos
         if (!title || !price || !code || !stock || !category) {
@@ -99,23 +102,41 @@ const updateProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
     const productId = req.params.pid;
-
     try {
         const product = await Products.findById(productId);
         if (!product) {
             return res.status(404).send("Producto no encontrado");
         }
 
+        const owner = await User.findById(product.owner); // Suponiendo que tienes un modelo User y product.owner es el ID del usuario
+
         if (req.user.role === 'admin' || (req.user.role === 'premium' && product.owner.toString() === req.user._id.toString())) {
             const conf = await Products.deleteOne({ _id: productId });
             if (conf.deletedCount != 0) {
-                res.status(200).send("Producto eliminado");
+                if (owner.role === 'premium') {
+                    // Enviar correo electrónico al propietario
+                    const mailOptions = {
+                        from: "soledadsantucho@gmail.com",
+                        to: owner.email,
+                        subject: "Producto Eliminado",
+                        text: `Tu producto "${product.title}" ha sido eliminado del catálogo.`,
+                    };
+
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            console.log("Error al enviar el correo:", error);
+                        } else {
+                            console.log("Correo enviado:", info.response);
+                        }
+                    });
+                }
+                return res.status(200).send("Producto eliminado");
             }
         } else {
-            res.status(403).send("No tiene permiso para eliminar este producto");
+            return res.status(403).send("No tiene permiso para eliminar este producto");
         }
     } catch (err) {
-        res.status(404).send(err);
+        return res.status(500).send("Error interno del servidor");
     }
 }
 
