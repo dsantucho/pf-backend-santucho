@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Products</title>
+</head>
 <body class="container bg-slate-200">
     <div id="navbar"></div>
     <div class="container my-8">
-        
-        <h1 class="  size-20 w-full text-4xl tracking-wide text-center underline uppercase font-sans">View Products
-        </h1>
-        <h2 class="w-full text-2xl tracking-wide text-center  font-sans  underline">Lista de Productos</h2>
-        <div class="">
-            <button onclick="irCarrito()" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">VER MI
-                CARRITO</button>
+        <h1 class="text-4xl tracking-wide text-center underline uppercase font-sans">View Products</h1>
+        <h2 class="text-2xl tracking-wide text-center font-sans underline">Lista de Productos</h2>
+        <div class="text-center">
+            <button onclick="irCarrito()" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">VER MI CARRITO</button>
         </div>
         <div id="pages" class="mt-5 flex flex-wrap justify-center"></div>
         <div id="productList" class="mt-5 flex flex-wrap justify-center"></div>
-
-        <!-- Botones de paginación -->
-        <div id="pagination" class="flex justify-center mt-5">
-        </div>
+        <div id="pagination" class="flex justify-center mt-5"></div>
     </div>
     <script src="/js/navbar.js"></script>
     <script src="/js/products.js"></script>
-    
 </body>
 </html>

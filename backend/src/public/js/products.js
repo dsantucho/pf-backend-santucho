@@ -25,11 +25,12 @@ document.addEventListener('DOMContentLoaded', function () {
   `);
   }
 
-  function render(data, currentUser) {
+  function render(data, currentUser, cartProducts) {
     const html = data.map(elem => {
       let owner = 'undefined';
       let ownerInfo = 'undefined';
       let cardStyle = '';
+      const thumbnail = elem.thumbnails || '/assets/default-thumbnail.jpg'; // Ruta de la imagen por defecto
 
       if (elem.owner) {
         if (elem.owner === 'admin') {
@@ -45,23 +46,35 @@ document.addEventListener('DOMContentLoaded', function () {
         cardStyle = 'background-color: rgba(255, 0, 0, 0.25) !important;';
       }
 
+      const isInCart = cartProducts.some(product => product.product._id === elem._id);
+
       return (`
-      <div class="max-w-xs rounded overflow-hidden shadow-lg bg-white m-4" style="${cardStyle}">
+      <div class="max-w-xs rounded overflow-hidden shadow-lg bg-white m-4" style="${cardStyle}" id="card_${elem._id}">
         <div class="px-6 py-4">
+          <img src="${thumbnail}" alt="${elem.title}" class="w-full h-48 object-cover">
           <div class="font-bold text-xl mb-2">${elem.title}</div>
           <p class="text-gray-700 text-base">
             <strong>Precio:</strong> $${elem.price}<br>
             <strong>Categoría:</strong> ${elem.category}<br>
             <strong>Stock:</strong> ${elem.stock}<br>
             <strong>ID:</strong> ${elem._id}<br>
-            <strong>Propietario:</strong> ${ownerInfo}<br>
+            ${(currentUser.role === 'admin' || currentUser.role === 'premium')? 
+            `<strong>Propietario:</strong> ${elem.owner.email}<br>
+            <strong>Rol:</strong> ${elem.owner.role}<br>`: ''}
           </p>
+          ${isInCart ? `
+          <div class="bg-green-500 text-white font-bold text-center px-4 py-2 mt-2 flex w-full h-auto">
+            Producto agregado
+          </div>` : `
+          <div class="flex items-center space-x-2" id="addToCartSection_${elem._id}">
+            <input type="number" id="quantity_${elem._id}" min="1" max="${elem.stock}" value="1" class="mt-2 px-2 py-1 border rounded w-16">
+            <button onclick="validateAndAddToCart('${elem._id}', ${elem.stock})" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-2">
+              Agregar al carrito
+            </button>
+          </div>
+          <p id="error_${elem._id}" class="text-red-500 text-sm mt-2" style="display: none;">La cantidad deseada excede el stock disponible</p>
+          `}
         </div>
-        ${(currentUser.role === 'admin' || currentUser.role === 'user' || (currentUser.role === 'premium' && currentUser._id !== owner)) ? `
-          <button onclick="addToCart('${elem._id}')" class=" text-black font-bold py-2 px-4 rounded">
-            Agregar a carrito
-          </button>
-        ` : ''}
       </div>
     `);
     }).join(' ');
@@ -74,10 +87,13 @@ document.addEventListener('DOMContentLoaded', function () {
       const response = await fetch(`${apiUrl}/api/products/?limit=8&page=${page}`);
       const userResponse = await fetch(`${apiUrl}/api/session/current`);
       const currentUser = await userResponse.json();
+      const cartResponse = await fetch(`${apiUrl}/api/carts/${currentUser.cart}`);
+      const cartData = await cartResponse.json();
+      const cartProducts = cartData.products;
 
       if (response.ok) {
         const data = await response.json();
-        render(data.payload, currentUser);
+        render(data.payload, currentUser, cartProducts);
         updatePagination(data);
         pagesInfo(data);
         console.log(data);
@@ -139,15 +155,46 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Funciones globales
-async function addToCart(productId) {
+async function validateAndAddToCart(productId, stock) {
+  const quantityInput = document.getElementById(`quantity_${productId}`);
+  const quantity = parseInt(quantityInput.value);
+  const errorMessage = document.getElementById(`error_${productId}`);
+
+  if (quantity > stock) {
+    quantityInput.classList.add('border-red-500');
+    errorMessage.style.display = 'block';
+  } else {
+    quantityInput.classList.remove('border-red-500');
+    errorMessage.style.display = 'none';
+    await addToCart(productId, quantity);
+  }
+}
+
+async function addToCart(productId, quantity) {
   try {
     const userResponse = await fetch(`${apiUrl}/api/session/current`);
     const userData = await userResponse.json();
     const cartId = userData.cart;
     const addToCartResponse = await fetch(`${apiUrl}/api/carts/${cartId}/product/${productId}`, {
-      method: 'POST'
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ quantity })
     });
     const result = await addToCartResponse.json();
+
+    if (addToCartResponse.ok) {
+      const card = document.getElementById(`card_${productId}`);
+      const addToCartSection = document.getElementById(`addToCartSection_${productId}`);
+      const successMessage = document.createElement('div');
+      successMessage.classList.add('bg-green-500', 'text-white', 'font-bold', 'text-center', 'px-4', 'py-2', 'mt-2', 'flex', 'w-full', 'h-auto');
+      successMessage.textContent = 'Producto agregado';
+
+      addToCartSection.innerHTML = ''; // Clear the section content
+      addToCartSection.appendChild(successMessage);
+    }
+
     console.log(result.message);
   } catch (error) {
     console.error('Error al agregar producto al carrito:', error);
