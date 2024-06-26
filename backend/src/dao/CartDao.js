@@ -2,8 +2,8 @@ const fs = require('fs').promises;
 const ProductManager = require('./ProductDao.js')
 //BD
 const CartsModel = require("../modules/cart.model.js")
-const TicketModel = require("../modules/ticket.model.js")
-const TicketDao = require("./TicketDao.js")
+//const TicketModel = require("../modules/ticket.model.js")
+//const TicketDao = require("./TicketDao.js")
 
 class Carts {
     constructor() {
@@ -165,9 +165,71 @@ class Carts {
             return err;
         }
     }
-
-
-    async purchaseCart(cartId, email) {
+    async purchaseCart(cartId, email, amount, userId) {
+        try {
+            const cart = await this.getCartById(cartId);
+            if (!cart) {
+                return { error: 'Carrito no encontrado' };
+            }
+    
+            const productsNotProcessed = [];
+    
+            for (const item of cart.products) {
+                const product = new ProductManager();
+                const productExists = await product.getProductById(item.product);
+                if (!productExists) {
+                    return { error: 'Producto no encontrado' };
+                }
+    
+                if (productExists.stock < item.quantity) {
+                    productsNotProcessed.push(item.product);
+                } else {
+                    const updatedStock = productExists.stock - item.quantity;
+                    await product.updateProduct(item.product._id, { stock: updatedStock });
+                }
+            }
+    
+            // Crear el ticket usando la API de tickets
+            const ticketResponse = await fetch(`http://localhost:8080/api/tickets`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cartId: cartId,
+                    amount: amount,
+                    purchaser: email,
+                    userId: userId
+                })
+            });
+    
+            if (!ticketResponse.ok) {
+                const ticketError = await ticketResponse.json();
+                return { error: ticketError.error };
+            }
+    
+            const ticket = await ticketResponse.json();
+    
+            cart.products = cart.products.filter(item => productsNotProcessed.includes(item.product.toString()));
+            await this.updateCart(cartId, cart.products);
+    
+            if (productsNotProcessed.length > 0) {
+                return { 
+                    message: 'Compra parcialmente realizada, productos no disponibles:', 
+                    data: productsNotProcessed 
+                };
+            } else {
+                return { 
+                    message: `Compra realizada exitosamente, monto: ${amount}`, 
+                    data: ticket 
+                };
+            }
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+    
+/*     async purchaseCart(cartId, email) {
         try {
             const cart = await this.getCartById(cartId);
             if (!cart) {
@@ -215,7 +277,7 @@ class Carts {
         } catch (error) {
             return { error: error.message };
         }
-    }
+    } */
     
 }
 module.exports = Carts;

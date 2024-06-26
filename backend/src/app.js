@@ -25,7 +25,9 @@ const dotenv = require('dotenv');
 const cors = require("cors");
 const { addLogger } = require('./utils/logger.js');
 const swaggerJSDoc = require('swagger-jsdoc');
-const swaggerUIExpress = require('swagger-ui-express')
+const swaggerUIExpress = require('swagger-ui-express');
+const paymentRoutes = require('./routes/payment.routes.js');
+const ticketRoutes = require('./routes/ticket.routes.js')
 
 
 
@@ -104,6 +106,8 @@ app.use('/api/carts/', routerCart)
 app.use('/auth/', routerAuth)
 app.use('/api/session/', routerSession)
 app.use('/api/users', userRouter);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/tickets', ticketRoutes);
 app.use('/api/documents', documentRouter);
 const swaggerOptions = {
   definition: {

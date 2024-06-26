@@ -6,11 +6,12 @@ const ticketSchema = new mongoose.Schema({
     code: { 
         type: String, 
         unique: true, 
-        //default: generateRandomNumbers(8).join('')
     },
     purchase_datetime: { type: Date, default: Date.now },
     amount: { type: Number },
-    purchaser: { type: String}
+    purchaser: { type: String },
+    cartId: { type: mongoose.Schema.Types.ObjectId, ref: 'cart' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }
 });
 
 // Antes de guardar el ticket, generamos un código único

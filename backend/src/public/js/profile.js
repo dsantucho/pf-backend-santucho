@@ -1,150 +1,367 @@
 document.addEventListener('DOMContentLoaded', function () {
     let apiUrl = '';
+    let userId = '';
+    let userEmail = '';
 
-    // Obtener la configuración del servidor y luego ejecutar las funciones necesarias
     fetch('/api/config')
         .then(response => response.json())
         .then(config => {
             apiUrl = `http://localhost:${config.apiUrl}`;
-            console.log(apiUrl)
+
+            fetch(`${apiUrl}/api/session/current`)
+                .then(response => response.json())
+                .then(data => {
+                    const cartId = data.cart;
+                    userId = data._id; // Obtener el ID del usuario
+                    userEmail = data.email; // Obtener el email del usuario
+                    fetchCartProducts(cartId);
+                })
+                .catch(error => {
+                    console.error('Error al obtener la configuración del servidor:', error);
+                });
         })
         .catch(error => {
             console.error('Error al obtener la configuración del servidor:', error);
         });
 
-    // Obtener información del usuario actual
-    fetch(`${apiUrl}/api/session/current`)
-        .then((response) => {
-            response.json().then(data => {
-                const cartId = data.cart; // Se asume que la propiedad cart contiene la ID del carrito
-                // Obtener productos del carrito usando la ID del carrito
-                fetch(`${apiUrl}/api/carts/${cartId}`)
-                    .then((response) => {
-                        response.json().then(data => {
-                            render(data.products);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error al obtener productos del carrito:', error);
-                    });
+    function fetchCartProducts(cartId) {
+        fetch(`${apiUrl}/api/carts/${cartId}`)
+            .then(response => response.json())
+            .then(data => {
+                render(data.products);
+                renderPurchaseDetails(cartId, data.products);
+                seguirComprando();
+            })
+            .catch(error => {
+                console.error('Error al obtener productos del carrito:', error);
             });
-        })
-        .catch(error => {
-            console.error('Error al obtener información del usuario actual:', error);
-        });
-
+    }
 
     function render(data) {
         const cartListElement = document.getElementById('cartList');
 
         if (data.length === 0) {
-            // Si no hay productos en el carrito, mostrar un mensaje y un botón para ir a la página de productos
             cartListElement.innerHTML = `
-            <div class="text-center">
-                <p class="text-xl font-bold">No hay productos en tu carrito</p>
-                <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
-            </div>`;
+                <div class="text-center">
+                    <p class="text-xl font-bold">No hay productos en tu carrito</p>
+                    <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
+                </div>`;
         } else {
-            // Si hay productos en el carrito, generar el HTML para mostrar los productos
-            let html = '';
-            data.forEach(elem => {
-                html += `
-                    <div class="max-w-xs rounded overflow-hidden shadow-lg bg-white m-4">
-                        <div class="px-6 py-4">
-                            <div class="font-bold text-xl mb-2">${elem.product.title}</div>
-                            <p class="text-gray-700 text-base">
+            const itemsHtml = data.map(elem => {
+                const totalItemPrice = (elem.product.price * elem.quantity).toFixed(2);
+                return `
+                    <div class="flex items-center bg-white shadow rounded-lg p-4 mb-4">
+                        <img src="${elem.product.thumbnails || '/assets/default-thumbnail.jpg'}" alt="${elem.product.title}" class="w-16 h-16 object-cover rounded mr-4">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-xl mb-2">${elem.product.title}</h3>
+                            <p class="text-gray-700">
                                 <strong>Precio:</strong> $${elem.product.price}<br>
                                 <strong>Categoría:</strong> ${elem.product.category}<br>
-                                <strong>Description:</strong> ${elem.product.description}<br>
-                                <strong>Quantity:</strong> ${elem.quantity}<br>
-                                <strong>ID:</strong> ${elem.product._id}<br>
                             </p>
                         </div>
-                        <button onclick="addQuantity('${elem.quantity}')" class="text-black font-bold py-2 px-4 rounded">
-                            Sumar Quantity
-                        </button>
-                    </div>`;
-            });
+                        <div class="flex items-center">
+                            <input type="number" id="quantity_${elem.product._id}" min="1" max="${elem.product.stock}" value="${elem.quantity}" class="px-2 py-1 border rounded w-16 text-center mr-2">
+                            <p class="text-gray-700 font-bold mx-2" id="total_${elem.product._id}">$${totalItemPrice}</p>
+                            <button onclick="updateQuantity('${elem.product._id}')" class="bg-blue-500 text-white font-bold py-1 px-3 rounded mx-2">Actualizar</button>
+                            <button onclick="removeFromCart('${elem.product._id}')" class="bg-red-500 text-white font-bold py-1 px-3 rounded">Eliminar</button>
+                        </div>
+                        <p id="error_${elem.product._id}" class="text-red-500 text-sm mt-2" style="display: none;">La cantidad deseada excede el stock disponible</p>
+                    </div>
+                `;
+            }).join('');
 
-            // Agregar el botón "Comprar" arriba de la lista de productos
-            html = `
-                <div class="">
-                <button onclick="realizarCompra()" class=" my-4 py-2 px-4 rounded bg-green-500 text-white font-bold">Comprar</button>
-                <button onclick="explorarProductos()" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
-                </div>
-                ${html}`;
-
-            cartListElement.innerHTML = html;
+            cartListElement.innerHTML = itemsHtml;
         }
     }
 
-    function realizarCompra() {
-        // Obtener la ID del carrito
-        fetch(`${apiUrl}/api/session/current`)
-            .then(response => response.json())
-            .then(data => {
-                const cartId = data.cart;
-                // Realizar la solicitud POST al endpoint de compra del carrito
-                fetch(`${apiUrl}/api/carts/${cartId}/purchase`, {
-                    method: 'POST',
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Manejar la respuesta del servidor (puede mostrar un mensaje de éxito o error)
-                        // Mostrar el mensaje de banner y la lista de productos no comprados
-                        mostrarMensajeCompra(data);
-                    })
-                    .catch(error => {
-                        console.error('Error al realizar la compra:', error);
-                    });
-            })
-            .catch(error => {
-                console.error('Error al obtener la información del usuario:', error);
-            });
+    async function createPaymentIntent(totalAmount) {
+        const amountInCents = Math.round(totalAmount * 100); // Convertir a centavos
+        const response = await fetch(`${apiUrl}/api/payments/create-payment-intent`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount: amountInCents })
+        });
+
+        return await response.json();
     }
+
+    async function handlePayment(cartId, totalAmount, stripe, elements, userId, userEmail) {
+        const paymentIntent = await createPaymentIntent(totalAmount);
+
+        const cardElement = elements.getElement('card');
+
+        const { error, paymentIntent: confirmedPaymentIntent } = await stripe.confirmCardPayment(paymentIntent.clientSecret, {
+            payment_method: {
+                card: cardElement
+            }
+        });
+
+        if (error) {
+            alert('Payment failed: ' + error.message);
+        } else {
+            realizarCompra(cartId, totalAmount, userId, userEmail);
+        }
+    }
+
+
+    function renderPurchaseDetails(cartId, products) {
+        const totalItems = products.reduce((acc, item) => acc + item.quantity, 0);
+        const totalPrice = products.reduce((acc, item) => acc + item.product.price * item.quantity, 0).toFixed(2);
+
+        const purchaseDetailsElement = document.getElementById('purchaseDetails');
+        purchaseDetailsElement.innerHTML = `
+          <div class="bg-white shadow rounded-lg p-4">
+            <div class="flex justify-between mb-4">
+              <span>Mi Carrito:</span>
+              <span>${cartId}</span>
+            </div>
+
+            <div class="flex justify-between mb-4">
+              <span>Total Items:</span>
+              <span>${totalItems}</span>
+            </div>
+            <div class="flex justify-between mb-4">
+              <span>Total a Pagar:</span>
+              <span>$${totalPrice}</span>
+            </div>
+            <form id="paymentForm">
+              <div class="mb-4">
+                <label for="cardNumber" class="block text-gray-700">Card number</label>
+                <div id="card-element" class="w-full p-2 border rounded mb-4"></div> <!-- Aquí se monta el elemento de la tarjeta -->
+              </div>
+              <button type="button" id="payButton" class="w-full bg-gray-500 text-white font-bold py-2 px-4 rounded" disabled>Pay $${totalPrice}</button>
+            </form>
+          </div>
+        `;
+
+        const stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY);
+        const elements = stripe.elements();
+        const cardElement = elements.create('card'); // Crear el elemento de tarjeta
+        cardElement.mount('#card-element'); // Montar el elemento de tarjeta en el div con id "card-element"
+
+        cardElement.on('change', function (event) {
+            const payButton = document.getElementById('payButton');
+            if (event.complete) {
+                payButton.disabled = false;
+                payButton.classList.remove('bg-gray-500');
+                payButton.classList.add('bg-green-500');
+            } else {
+                payButton.disabled = true;
+                payButton.classList.remove('bg-green-500');
+                payButton.classList.add('bg-gray-500');
+            }
+        });
+
+        const payButton = document.getElementById('payButton');
+        payButton.addEventListener('click', () => handlePayment(cartId, parseFloat(totalPrice), stripe, elements, userId, userEmail));
+    }
+
+    async function updateQuantity(productId) {
+        const quantityInput = document.getElementById(`quantity_${productId}`);
+        const newQuantity = parseInt(quantityInput.value);
+        const errorMessage = document.getElementById(`error_${productId}`);
+        const userResponse = await fetch(`${apiUrl}/api/session/current`);
+        const userData = await userResponse.json();
+        const cartId = userData.cart;
+
+        try {
+            const productResponse = await fetch(`${apiUrl}/api/products/${productId}`);
+            const productData = await productResponse.json();
+
+            if (newQuantity > productData.stock) {
+                quantityInput.classList.add('border-red-500');
+                errorMessage.style.display = 'block';
+            } else {
+                quantityInput.classList.remove('border-red-500');
+                errorMessage.style.display = 'none';
+
+                await fetch(`${apiUrl}/api/carts/${cartId}/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ quantity: newQuantity })
+                });
+
+                const totalItemPrice = (productData.price * newQuantity).toFixed(2);
+                document.getElementById(`total_${productId}`).textContent = `$${totalItemPrice}`;
+
+                fetchCartProducts(cartId);
+            }
+        } catch (error) {
+            console.error('Error al actualizar la cantidad del producto:', error);
+        }
+    }
+
+    async function removeFromCart(productId) {
+        const userResponse = await fetch(`${apiUrl}/api/session/current`);
+        const userData = await userResponse.json();
+        const cartId = userData.cart;
+
+        try {
+            await fetch(`${apiUrl}/api/carts/${cartId}/product/${productId}`, {
+                method: 'DELETE'
+            });
+            fetchCartProducts(cartId);
+        } catch (error) {
+            console.error('Error al eliminar el producto del carrito:', error);
+        }
+    }
+
+    /*     async function realizarCompra(cartId, totalAmount) {
+            const purchaseNotes = document.getElementById('purchaseNotes') ? document.getElementById('purchaseNotes').value : '';
+        
+            const response = await fetch(`${apiUrl}/api/session/current`);
+            const userData = await response.json();
+            const userId = userData._id;
+            const userEmail = userData.email; // Obtener el email del usuario
+        
+            const purchaseResponse = await fetch(`${apiUrl}/api/carts/${cartId}/purchase`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ notes: purchaseNotes })
+            });
+        
+            const data = await purchaseResponse.json();
+        
+            if (data.message) {
+                const purchaseDetailsElement = document.getElementById('purchaseDetails');
+                purchaseDetailsElement.innerHTML = `
+                    <div class="bg-green-500 text-white font-bold text-center p-4 rounded mb-4">
+                        <h2 class="text-3xl">Pago con éxito</h2>
+                        <p class="text-2xl">Total Items: ${data.data.totalItems}</p>
+                        <p class="text-2xl">Total Pagado: $${totalAmount.toFixed(2)}</p>
+                    </div>
+                `;
+        
+                // Crear ticket en la base de datos
+                createTicket(cartId, totalAmount, userId, userEmail);
+            } else if (data.error) {
+                alert('Error al realizar la compra: ' + data.error);
+            }
+        } */
+
+    /*     async function realizarCompra(cartId, totalAmount, userId, userEmail) {
+            const purchaseNotes = document.getElementById('purchaseNotes') ? document.getElementById('purchaseNotes').value : '';
+    
+            const purchaseResponse = await fetch(`${apiUrl}/api/carts/${cartId}/purchase`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ notes: purchaseNotes })
+            });
+    
+            const data = await purchaseResponse.json();
+    
+            if (data.message) {
+                const purchaseDetailsElement = document.getElementById('purchaseDetails');
+                purchaseDetailsElement.innerHTML = `
+                        <div class="bg-green-500 text-white font-bold text-center p-4 rounded mb-4">
+                            <h2 class="text-3xl">Pago con éxito</h2>
+                            <p class="text-2xl">Total Items: ${data.data.totalItems}</p>
+                            <p class="text-2xl">Total Pagado: $${totalAmount.toFixed(2)}</p>
+                        </div>
+                    `;
+    
+                // Crear ticket en la base de datos
+                createTicket(cartId, totalAmount, userId, userEmail);
+            } else if (data.error) {
+                alert('Error al realizar la compra: ' + data.error);
+            }
+        } */
+    async function realizarCompra(cartId, totalAmount, userId, userEmail) {
+        try {
+            const response = await fetch(`${apiUrl}/api/carts/${cartId}/purchase`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: totalAmount,
+                    userId: userId,
+                    userEmail: userEmail,
+                    notes: ""
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                mostrarMensajeCompra(data);
+            } else {
+                const errorData = await response.json();
+                alert(`Error al realizar la compra: ${errorData.error}`);
+            }
+        } catch (error) {
+            alert(`Error al realizar la compra: ${error.message}`);
+        }
+    }
+
+
+    // Actualiza la función createTicket para incluir el email del usuario
+    async function createTicket(cartId, totalAmount, userId, userEmail) {
+        const response = await fetch(`${apiUrl}/api/tickets`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                cartId: cartId,
+                amount: totalAmount,
+                purchaser: userEmail, // Pasar el email del usuario
+                userId: userId
+            })
+        });
+
+        if (response.ok) {
+            console.log('Ticket created successfully');
+        } else {
+            console.error('Error creating ticket');
+        }
+    }
+
 
     function mostrarMensajeCompra(data) {
         const bannerElement = document.getElementById('bannerCompra');
         bannerElement.innerHTML = '';
 
         if (data.message) {
-            // Limpiar la lista del carrito
             const cartListElement = document.getElementById('cartList');
             cartListElement.innerHTML = '';
-            // Mostrar el mensaje de éxito
             bannerElement.innerHTML = `
-            <div class= " bg-slate-950 w-full container"> 
-                <h2 class=" text-3xl text-green-500">${data.message}</h2>
-                <p class=" text-2xl text-green-500"> Codigo de compra = ${data.data.code}</p>
-                <p class=" text-2xl text-green-500"> Fecha de compra = ${data.data.purchase_datetime}</p>
-                <p class=" text-2xl text-green-500"> A nombre de = ${data.data.purchaser}</p>
-                <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
-            </div>
-            
+                <div class="bg-green-500 text-white font-bold text-center p-4 rounded mb-4">
+                    <h2 class="text-2xl">${data.message}</h2>
+                    <p class="text-xl">Código de compra: ${data.data.code}</p>
+                    <p class="text-xl">Fecha de compra: ${data.data.purchase_datetime}</p>
+                    <p class="text-xl">A nombre de: ${data.data.purchaser}</p>
+                    <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
+                </div>
             `;
+            // Ocultar la sección de detalles de la compra
+            const purchaseDetailsElement = document.getElementById('detalleCompra');
+            purchaseDetailsElement.style.display = 'none';
         } else if (data.error) {
-            // Mostrar el mensaje de error
             bannerElement.innerHTML = `<h2 class="text-red-500">${data.error}</h2>`;
         }
-
-        /*         if (data.productsNotProcessed && data.productsNotProcessed.length > 0) {
-                    // Mostrar la lista de productos no comprados
-                    const productListElement = document.createElement('ul');
-                    productListElement.classList.add('text-red-500');
-                    productListElement.innerHTML = '<h3>Productos no comprados:</h3>';
-            
-                    data.productsNotProcessed.forEach(productId => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = productId;
-                        productListElement.appendChild(listItem);
-                    });
-            
-                    bannerElement.appendChild(productListElement);
-                } */
     }
-});
 
-function explorarProductos() {
-    // Redirigir a la página de productos
-    window.location.href = `${apiUrl}/products`;
-}
+    function seguirComprando() {
+        bannerSeguirComprando = document.getElementById('seguirComprando');
+        bannerSeguirComprando.innerHTML = '';
+        bannerSeguirComprando.innerHTML = `
+        <h2> Quiero seguir comprando</h2>
+      <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>`;
+    }
+
+    window.explorarProductos = function () {
+        window.location.href = `${apiUrl}/products`;
+    };
+
+    window.updateQuantity = updateQuantity;
+    window.removeFromCart = removeFromCart;
+    window.realizarCompra = realizarCompra;
+});

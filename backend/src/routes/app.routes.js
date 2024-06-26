@@ -1,5 +1,6 @@
-const express = require('express')
-const {Router} = express
+const express = require('express');
+const {Router} = express;
+
 //middelware
 const {isAdmin, isUser, isAuthenticated, isAdminOrPremium} = require('../middlewares/auth.middleware.js')
 
@@ -44,7 +45,10 @@ router.get('/register-view', async(req,res)=>{
   res.render('register')
 })
 router.get('/profile-view',isAuthenticated, async(req,res)=>{
-  res.render('profile', {email: req.user.email})
+  res.render('profile', {
+    email: req.user.email,
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+  })
 })
 // Ruta de prueba para el logger
 router.get('/loggerTest', (req, res) => {
