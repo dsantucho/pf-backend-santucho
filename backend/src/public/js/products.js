@@ -63,8 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
             <strong>Rol:</strong> ${elem.owner.role}<br>`: ''}
           </p>
           ${isInCart ? `
-          <div class="bg-green-500 text-white font-bold text-center px-4 py-2 mt-2 flex w-full h-auto">
-            Producto agregado
+          <div class="bg-green-500 text-white font-bold text-center px-4 py-2 mt-2 flex w-full h-auto rounded-md">
+            <button onclick="window.location.href = '/cart-view'">Producto en Carrito </button>
+            
           </div>` : `
           <div class="flex items-center space-x-2" id="addToCartSection_${elem._id}">
             <input type="number" id="quantity_${elem._id}" min="1" max="${elem.stock}" value="1" class="mt-2 px-2 py-1 border rounded w-16">

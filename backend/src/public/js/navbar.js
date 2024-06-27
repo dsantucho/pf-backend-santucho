@@ -30,6 +30,7 @@ function renderNavbar(user) {
                 <a href="/auth/logout" class="ml-4 p-2 bg-red-600 rounded text-white">Logout</a>
                 <a href="/profile-view" class="ml-4 p-2 bg-green-600 rounded text-white">Profile</a>
                 <a href="/products" class="ml-4 p-2 bg-violet-950 rounded text-white">HOME</a>
+                <a href="/cart-view" class="ml-4 p-2 bg-orange-500 rounded text-white">Carrito</a>
                 ${user.role === 'admin' || user.role === 'premium' ? `<a href="/admin-view" class="ml-4 p-2 bg-yellow-600 rounded text-white">Admin Productos</a>` : ''}
                 ${user.role === 'admin' ? `<a href="/admin/users" class="ml-4 p-2 bg-orange-600 rounded text-white">Admin Usuarios</a>` : ''}
             </div>
