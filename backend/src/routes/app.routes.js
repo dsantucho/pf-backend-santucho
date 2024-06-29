@@ -37,7 +37,7 @@ router.get('/admin-view', isAdminOrPremium, async(req,res)=>{
   res.render('adminView')
 })
 //login vista
-router.get('/login-view', async(req,res)=>{
+router.get('/', async(req,res)=>{
   res.render('login')
 })
 //registro vista
