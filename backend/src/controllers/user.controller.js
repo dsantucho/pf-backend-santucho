@@ -1,30 +1,6 @@
 const User = require('../modules/user.model');
 const Cart = require('../dao/CartDao');
-
-/* const changeUserRole = async (req, res) => {
-    try {
-        const userId = req.params.uid;
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-        // Verificar si el usuario tiene un carrito, si no, crear uno nuevo
-        if (!user.cart) {
-            let newCart = new Cart();
-            user.cart = await newCart.createCart();
-        }
-
-        // Alternar el rol entre 'user' y 'premium'
-        user.role = user.role === 'user' ? 'premium' : 'user';
-        await user.save();
-
-        res.status(200).json({ message: `Rol del usuario actualizado a ${user.role}` });
-    } catch (error) {
-        console.error('Error al cambiar el rol del usuario:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-} */
+const transporter = require('../config/email/mailing')
 
 const changeUserRole = async (req, res) => {
     try {
@@ -102,25 +78,67 @@ const updateUserDocuments = async (req, res) => {
     }
 };
 const updateUserProfileImage = async (req, res) => {
-    console.log('req.baseUrl: ', req.baseUrl)
     try {
         const userId = req.params.uid;
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
+            return res.status(404).json({success: false, message: 'Usuario no encontrado' });
         }
         console.log('req.file: ',req.file)
         if (!req.file) {
-            return res.status(400).json({ message: 'No se ha subido ningún archivo' });
+            return res.status(400).json({success: false, message: 'No se ha subido ningún archivo' });
         }
-        console.log('req.file.path: ', req.file.path)
-        user.profileImage = req.file.path;
+        user.profileImage = `/uploads/profiles/${req.file.filename}`;
         await user.save();
 
-        res.status(200).json({ message: 'Imagen de perfil actualizada', profileImage: user.profileImage });
+        res.status(200).json({success: true, message: 'Imagen de perfil actualizada', profileImage: user.profileImage });
     } catch (error) {
-        console.error('Error al actualizar la imagen de perfil:', error);
+        res.status(500).json({success: false, message: 'Error interno del servidor' });
+    }
+};
+const deleteInactiveUsers = async (req, res) => {
+    try {
+        // Definir el límite de inactividad (30 minutos para pruebas)
+        //const inactivityLimit = new Date(Date.now() - 30 * 60 * 1000); // 30 minutos para pruebas
+        const inactivityLimit = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000); // 2 días en producción
+
+        // Encontrar usuarios inactivos con roles 'user' o 'premium'
+        const inactiveUsers = await User.find({ 
+            last_connection: { $lt: inactivityLimit },
+            role: { $in: ['user', 'premium'] }
+        });
+
+        // Enviar correos y eliminar usuarios
+        for (const user of inactiveUsers) {
+            await transporter.sendMail({
+                from: 'soledadsantucho@gmail.com',
+                to: user.email,
+                subject: 'Cuenta eliminada por inactividad',
+                text: `Hola ${user.first_name}, tu cuenta ha sido eliminada debido a inactividad prolongada.`
+            });
+
+            await User.deleteOne({ _id: user._id });
+        }
+
+        res.status(200).json({ message: 'Usuarios inactivos eliminados', count: inactiveUsers.length });
+    } catch (error) {
+        console.error('Error al eliminar usuarios inactivos:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+const deleteUser = async (req, res) => {
+    try {
+        const userId = req.params.uid;
+        const user = await User.findByIdAndDelete(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.status(200).json({ message: 'Usuario eliminado' });
+    } catch (error) {
+        console.error('Error al eliminar el usuario:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
@@ -130,5 +148,7 @@ module.exports = {
     changeUserRole,
     getUsers,
     updateUserDocuments,
-    updateUserProfileImage
+    updateUserProfileImage,
+    deleteInactiveUsers,
+    deleteUser
 };

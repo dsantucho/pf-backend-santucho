@@ -1,164 +1,147 @@
-let apiUrl = '';
-// ** FETCH ${apiUrl} **
-// Obtener la configuración del servidor y luego ejecutar las funciones necesarias
-fetch('/api/config')
-    .then(response => response.json())
-    .then(config => {
-        apiUrl = `http://localhost:${config.apiUrl}`;
-        console.log(apiUrl)
-    })
-    .catch(error => {
-        console.error('Error al obtener la configuración del servidor:', error);
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    let apiUrl = '';
+    let userId = '';
+    let userEmail = '';
+    let documents = [];
+    let firstName = '';
+    let lastName = '';
+    let age = '';
+    let role = '';
+    let lastConnection = '';
+    let profileImage = '';
 
-function bannerPersonalData (data){
-    document.getElementById('bannerPersonalData').innerHTML = 
-       (`
-       <h1 class ="text-4xl tracking-wide font-sans" >User Profile</h1>
-       <h1 class="text-2xl tracking-wide font-sans">Nombre: ${data.email}!</h1>
-       <p  class="text-2xl tracking-wide font-sans">Rol: ${data.role}</p>
-       <p class = "text-2xl tracking-wide font-sans">Mi Carrito = ${data.cart} </p>
-       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="/auth/logout">Logout</a>
-       <a class="my-2 w-fit font-bold py-2 px-4 rounded text-white bg-red-600" href="${apiUrl}/products">Ir a Productos</a>
+    fetch('/api/config')
+        .then(response => response.json())
+        .then(config => {
+            apiUrl = `http://localhost:${config.apiUrl}`;
 
-      `) 
-  }
+            return fetch(`${apiUrl}/api/session/current`);
+        })
+        .then(response => response.json())
+        .then(data => {
+            userId = data._id;
+            userEmail = data.email;
+            documents = data.documents;
+            firstName = data.first_name;
+            lastName = data.last_name;
+            age = data.age;
+            role = data.role;
+            lastConnection = new Date(data.last_connection).toLocaleString();
+            profileImage = data.profileImage;
 
-  function render(data) {
-    const cartListElement = document.getElementById('cartList');
-    
-    if (data.length === 0) {
-        // Si no hay productos en el carrito, mostrar un mensaje y un botón para ir a la página de productos
-        cartListElement.innerHTML = `
-            <div class="text-center">
-                <p class="text-xl font-bold">No hay productos en tu carrito</p>
-                <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
-            </div>`;
-    } else {
-            // Si hay productos en el carrito, generar el HTML para mostrar los productos
-            let html = '';
-            data.forEach(elem => {
-                html += `
-                    <div class="max-w-xs rounded overflow-hidden shadow-lg bg-white m-4">
-                        <div class="px-6 py-4">
-                            <div class="font-bold text-xl mb-2">${elem.product.title}</div>
-                            <p class="text-gray-700 text-base">
-                                <strong>Precio:</strong> $${elem.product.price}<br>
-                                <strong>Categoría:</strong> ${elem.product.category}<br>
-                                <strong>Description:</strong> ${elem.product.description}<br>
-                                <strong>Quantity:</strong> ${elem.quantity}<br>
-                                <strong>ID:</strong> ${elem.product._id}<br>
-                            </p>
-                        </div>
-                        <button onclick="addQuantity('${elem.quantity}')" class="text-black font-bold py-2 px-4 rounded">
-                            Sumar Quantity
-                        </button>
-                    </div>`;
-            });
-          
-            // Agregar el botón "Comprar" arriba de la lista de productos
-            html = `
-                <div class="">
-                <button onclick="realizarCompra()" class=" my-4 py-2 px-4 rounded bg-green-500 text-white font-bold">Comprar</button>
-                <button onclick="explorarProductos()" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
-                </div>
-                ${html}`;
-      
-        cartListElement.innerHTML = html;
-    }
-}
-
-// Obtener información del usuario actual
-fetch(`${apiUrl}/api/session/current`)
-    .then((response) => {
-        response.json().then(data => {
-            bannerPersonalData(data);
-            const cartId = data.cart; // Se asume que la propiedad cart contiene la ID del carrito
-            // Obtener productos del carrito usando la ID del carrito
-            fetch(`${apiUrl}/api/carts/${cartId}`)
-                .then((response) => {
-                    response.json().then(data => {
-                        render(data.products);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error al obtener productos del carrito:', error);
-                });
+            updateProfileInfo(data);
+            displayDocumentInputs(documents);
+        })
+        .catch(error => {
+            console.error('Error al obtener la configuración del servidor:', error);
         });
-    })
-    .catch(error => {
-        console.error('Error al obtener información del usuario actual:', error);
+
+    function updateProfileInfo(userData) {
+        document.getElementById('profilePicture').src = userData.profileImage ? `${apiUrl}${userData.profileImage}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTko38x76BKbf_gARfDc4DuyP_Q30OnRBpT_w&s';
+        document.getElementById('userName').textContent = `${userData.first_name} ${userData.last_name}`;
+        document.getElementById('userEmail').textContent = userData.email;
+        document.getElementById('fullName').value = `${userData.first_name} ${userData.last_name}`;
+        document.getElementById('email').value = userData.email;
+        document.getElementById('age').value = userData.age;
+        document.getElementById('cart').value = userData.cart;
+        document.getElementById('role').value = userData.role;
+        document.getElementById('lastConnection').value = new Date(userData.last_connection).toLocaleString();
+    }
+
+    function displayDocumentInputs(userDocuments) {
+        const documentInputs = document.getElementById('documentInputs');
+        const documentTypes = ['identificacion', 'comprobante_domicilio', 'estado_cuenta', 'otros'];
+
+        documentInputs.innerHTML = ''; // Clear previous document inputs
+
+        documentTypes.forEach(type => {
+            const userDocument = userDocuments.find(doc => doc.name === type); // Renombrado para evitar conflicto con document
+            const documentDiv = document.createElement('div');
+            documentDiv.className = 'mb-4';
+
+            if (userDocument) {
+                documentDiv.innerHTML = `
+                    <label class="block text-gray-700">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                    <p class="text-green-500 font-bold">[CARGADO]</p>
+                `;
+            } else {
+                documentDiv.innerHTML = `
+                    <label for="${type}" class="block text-gray-700">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                    <input type="file" id="${type}" name="${type}" class="w-full p-2 border rounded mb-4">
+                `;
+            }
+
+            documentInputs.appendChild(documentDiv);
+        });
+    }
+
+    document.getElementById('uploadProfileImageForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch(`${apiUrl}/api/users/profile/image/${userId}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            console.log('data:', data)
+            if (data.success) {
+                await fetchUserProfile(); // Refresh profile after upload
+            } else {
+                alert('Error uploading profile image');
+            }
+        } catch (error) {
+            console.error('Error uploading profile image:', error);
+        }
     });
 
-    function explorarProductos() {
-        // Redirigir a la página de productos
-        window.location.href = `${apiUrl}/products`;
-    }
+    document.getElementById('uploadDocumentForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData();
 
-    function realizarCompra() {
-        // Obtener la ID del carrito
-        fetch(`${apiUrl}/api/session/current`)
-            .then(response => response.json())
-            .then(data => {
-                const cartId = data.cart;
-                // Realizar la solicitud POST al endpoint de compra del carrito
-                fetch(`${apiUrl}/api/carts/${cartId}/purchase`, {
-                    method: 'POST',
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Manejar la respuesta del servidor (puede mostrar un mensaje de éxito o error)
-                    // Mostrar el mensaje de banner y la lista de productos no comprados
-                    mostrarMensajeCompra(data);
-                })
-                .catch(error => {
-                    console.error('Error al realizar la compra:', error);
-                });
-            })
-            .catch(error => {
-                console.error('Error al obtener la información del usuario:', error);
+        const inputs = document.querySelectorAll('#documentInputs input[type="file"]');
+        inputs.forEach(input => {
+            if (input.files.length > 0) {
+                formData.append('documents', input.files[0]);
+                formData.append('documentName', input.name); // Add document name to formData
+            }
+        });
+
+        try {
+            const response = await fetch(`${apiUrl}/api/documents/${userId}`, {
+                method: 'POST',
+                body: formData
             });
-    }
-
-    function mostrarMensajeCompra(data) {
-        const bannerElement = document.getElementById('bannerCompra');
-        bannerElement.innerHTML = '';
-    
-        if (data.message) {
-            // Limpiar la lista del carrito
-            const cartListElement = document.getElementById('cartList');
-            cartListElement.innerHTML = '';
-            // Mostrar el mensaje de éxito
-            bannerElement.innerHTML = `
-            <div class= " bg-slate-950 w-full container"> 
-                <h2 class=" text-3xl text-green-500">${data.message}</h2>
-                <p class=" text-2xl text-green-500"> Codigo de compra = ${data.data.code}</p>
-                <p class=" text-2xl text-green-500"> Fecha de compra = ${data.data.purchase_datetime}</p>
-                <p class=" text-2xl text-green-500"> A nombre de = ${data.data.purchaser}</p>
-                <button onclick="window.location.href = '${apiUrl}/products'" class="my-4 py-2 px-4 rounded bg-blue-500 text-white font-bold">Explora productos</button>
-            </div>
-            
-            `;
-        } else if (data.error) {
-            // Mostrar el mensaje de error
-            bannerElement.innerHTML = `<h2 class="text-red-500">${data.error}</h2>`;
+            const data = await response.json();
+            if (data.message === 'Documentos actualizados') {
+                await fetchUserProfile(); // Refresh profile after upload
+            } else {
+                console.error('Error uploading documents:', data.message);
+            }
+        } catch (error) {
+            console.error('Error uploading documents:', error);
         }
-    
-/*         if (data.productsNotProcessed && data.productsNotProcessed.length > 0) {
-            // Mostrar la lista de productos no comprados
-            const productListElement = document.createElement('ul');
-            productListElement.classList.add('text-red-500');
-            productListElement.innerHTML = '<h3>Productos no comprados:</h3>';
-    
-            data.productsNotProcessed.forEach(productId => {
-                const listItem = document.createElement('li');
-                listItem.textContent = productId;
-                productListElement.appendChild(listItem);
-            });
-    
-            bannerElement.appendChild(productListElement);
-        } */
+    });
+
+    async function fetchUserProfile() {
+        try {
+            const response = await fetch(`${apiUrl}/api/session/current`);
+            const data = await response.json();
+            userId = data._id;
+            userEmail = data.email;
+            documents = data.documents;
+            firstName = data.first_name;
+            lastName = data.last_name;
+            age = data.age;
+            role = data.role;
+            lastConnection = new Date(data.last_connection).toLocaleString();
+            profileImage = data.profileImage;
+
+            updateProfileInfo(data);
+            displayDocumentInputs(data.documents);
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+        }
     }
-    
-
-
+});
