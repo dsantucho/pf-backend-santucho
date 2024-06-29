@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let age = '';
     let role = '';
     let lastConnection = '';
+    let profileImage = '';
 
     fetch('/api/config')
         .then(response => response.json())
@@ -26,16 +27,17 @@ document.addEventListener('DOMContentLoaded', function () {
             age = data.age;
             role = data.role;
             lastConnection = new Date(data.last_connection).toLocaleString();
+            profileImage = data.profileImage;
 
             updateProfileInfo(data);
-            displayDocumentInputs(data.documents);
+            displayDocumentInputs(documents);
         })
         .catch(error => {
             console.error('Error al obtener la configuración del servidor:', error);
         });
 
     function updateProfileInfo(userData) {
-        document.getElementById('profilePicture').src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTko38x76BKbf_gARfDc4DuyP_Q30OnRBpT_w&s';
+        document.getElementById('profilePicture').src = userData.profileImage ? `${apiUrl}${userData.profileImage}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTko38x76BKbf_gARfDc4DuyP_Q30OnRBpT_w&s';
         document.getElementById('userName').textContent = `${userData.first_name} ${userData.last_name}`;
         document.getElementById('userEmail').textContent = userData.email;
         document.getElementById('fullName').value = `${userData.first_name} ${userData.last_name}`;
@@ -53,11 +55,11 @@ document.addEventListener('DOMContentLoaded', function () {
         documentInputs.innerHTML = ''; // Clear previous document inputs
 
         documentTypes.forEach(type => {
-            const documents = userDocuments.find(doc => doc.name === type);
+            const userDocument = userDocuments.find(doc => doc.name === type); // Renombrado para evitar conflicto con document
             const documentDiv = document.createElement('div');
             documentDiv.className = 'mb-4';
 
-            if (documents) {
+            if (userDocument) {
                 documentDiv.innerHTML = `
                     <label class="block text-gray-700">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
                     <p class="text-green-500 font-bold">[CARGADO]</p>
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 documentDiv.innerHTML = `
                     <label for="${type}" class="block text-gray-700">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
-                    <input type="file" id="${type}" name="documents" class="w-full p-2 border rounded mb-4">
+                    <input type="file" id="${type}" name="${type}" class="w-full p-2 border rounded mb-4">
                 `;
             }
 
@@ -73,62 +75,73 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.getElementById('uploadProfileImageForm').addEventListener('submit', function (e) {
+    document.getElementById('uploadProfileImageForm').addEventListener('submit', async function (e) {
         e.preventDefault();
         const formData = new FormData(this);
 
-        fetch(`${apiUrl}/api/users/profile/image/${userId}`, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch(`${apiUrl}/api/users/profile/image/${userId}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            console.log('data:', data)
             if (data.success) {
-                alert('Profile image uploaded successfully');
-                fetchUserProfile(); // Refresh profile after upload
+                await fetchUserProfile(); // Refresh profile after upload
             } else {
                 alert('Error uploading profile image');
             }
-        })
-        .catch(error => console.error('Error uploading profile image:', error));
+        } catch (error) {
+            console.error('Error uploading profile image:', error);
+        }
     });
 
-    document.getElementById('uploadDocumentForm').addEventListener('submit', function (e) {
+    document.getElementById('uploadDocumentForm').addEventListener('submit', async function (e) {
         e.preventDefault();
-        const formData = new FormData(this);
+        const formData = new FormData();
 
-        fetch(`${apiUrl}/api/documents/${userId}`, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Documents uploaded successfully');
-                fetchUserProfile(); // Refresh profile after upload
-            } else {
-                alert('Error uploading documents');
+        const inputs = document.querySelectorAll('#documentInputs input[type="file"]');
+        inputs.forEach(input => {
+            if (input.files.length > 0) {
+                formData.append('documents', input.files[0]);
+                formData.append('documentName', input.name); // Add document name to formData
             }
-        })
-        .catch(error => console.error('Error uploading documents:', error));
+        });
+
+        try {
+            const response = await fetch(`${apiUrl}/api/documents/${userId}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.message === 'Documentos actualizados') {
+                await fetchUserProfile(); // Refresh profile after upload
+            } else {
+                console.error('Error uploading documents:', data.message);
+            }
+        } catch (error) {
+            console.error('Error uploading documents:', error);
+        }
     });
 
-    function fetchUserProfile() {
-        fetch(`${apiUrl}/api/session/current`)
-            .then(response => response.json())
-            .then(data => {
-                userId = data._id;
-                userEmail = data.email;
-                documents = data.documents;
-                firstName = data.first_name;
-                lastName = data.last_name;
-                age = data.age;
-                role = data.role;
-                lastConnection = new Date(data.last_connection).toLocaleString();
+    async function fetchUserProfile() {
+        try {
+            const response = await fetch(`${apiUrl}/api/session/current`);
+            const data = await response.json();
+            userId = data._id;
+            userEmail = data.email;
+            documents = data.documents;
+            firstName = data.first_name;
+            lastName = data.last_name;
+            age = data.age;
+            role = data.role;
+            lastConnection = new Date(data.last_connection).toLocaleString();
+            profileImage = data.profileImage;
 
-                updateProfileInfo(data);
-                displayDocumentInputs(data.documents);
-            })
-            .catch(error => console.error('Error fetching user profile:', error));
+            updateProfileInfo(data);
+            displayDocumentInputs(data.documents);
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+        }
     }
 });

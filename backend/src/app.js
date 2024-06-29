@@ -16,6 +16,7 @@ const documentRouter = require("./routes/documents.routes.js")
 const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
+const path = require('path');
 //const ProductManager = require("./dao/FileSystem/ProductManager.js");qßweqweßß
 const ProductManager = require('./dao/ProductDao.js');
 const passport = require('passport');
@@ -73,6 +74,8 @@ app.use(addLogger)
 app.use(cors(corsOptions))
 //Public
 app.use(express.static(__dirname + '/public'));
+// Configuración para servir archivos estáticos
+app.use('/uploads', express.static(path.join(__dirname, 'src/public/uploads')));
 //Middelwares
 app.use(express.json()); //enviar y recibir archivos JSON
 app.use(express.urlencoded({ extended: true })); //permitir extensiones en la url
