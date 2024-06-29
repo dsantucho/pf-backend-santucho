@@ -1,5 +1,6 @@
-const express = require('express')
-const {Router} = express
+const express = require('express');
+const {Router} = express;
+
 //middelware
 const {isAdmin, isUser, isAuthenticated, isAdminOrPremium} = require('../middlewares/auth.middleware.js')
 
@@ -16,11 +17,16 @@ router.get('/products',isAuthenticated, async (req, res)=>{
   // Renderizar la vista home.handlebars y pasarle la lista de productos
   res.render('products',{email, role });
 }) 
-router.get('/carts/:cid',isAuthenticated, async (req, res)=>{
+/* router.get('/carts/:cid',isAuthenticated, async (req, res)=>{
   const cartId = req.params.cid;
   // Renderizar la vista cart.handlebars  de mi carrito
   res.render('cart',{cartId});
-}) 
+})  */
+
+// Ruta para la vista de administración de usuarios
+router.get('/admin/users', isAuthenticated, isAdmin, (req, res) => {
+  res.render('adminUsers');
+});
 
 /* router.get('/realtimeProducts', async (req, res)=>{
   // Renderizar la vista home.handlebars y pasarle la lista de productos
@@ -39,7 +45,15 @@ router.get('/register-view', async(req,res)=>{
   res.render('register')
 })
 router.get('/profile-view',isAuthenticated, async(req,res)=>{
-  res.render('profile', {email: req.user.email})
+  res.render('profile', {
+    email: req.user.email,
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+  })
+})
+router.get('/cart-view',isAuthenticated, async(req,res)=>{
+  res.render('cart', {
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+  })
 })
 // Ruta de prueba para el logger
 router.get('/loggerTest', (req, res) => {

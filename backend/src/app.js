@@ -16,6 +16,7 @@ const documentRouter = require("./routes/documents.routes.js")
 const app = express(); // creo la app
 const http = require('http');
 const server = http.createServer(app);
+const path = require('path');
 //const ProductManager = require("./dao/FileSystem/ProductManager.js");qßweqweßß
 const ProductManager = require('./dao/ProductDao.js');
 const passport = require('passport');
@@ -25,7 +26,9 @@ const dotenv = require('dotenv');
 const cors = require("cors");
 const { addLogger } = require('./utils/logger.js');
 const swaggerJSDoc = require('swagger-jsdoc');
-const swaggerUIExpress = require('swagger-ui-express')
+const swaggerUIExpress = require('swagger-ui-express');
+const paymentRoutes = require('./routes/payment.routes.js');
+const ticketRoutes = require('./routes/ticket.routes.js')
 
 
 
@@ -71,6 +74,8 @@ app.use(addLogger)
 app.use(cors(corsOptions))
 //Public
 app.use(express.static(__dirname + '/public'));
+// Configuración para servir archivos estáticos
+app.use('/uploads', express.static(path.join(__dirname, 'src/public/uploads')));
 //Middelwares
 app.use(express.json()); //enviar y recibir archivos JSON
 app.use(express.urlencoded({ extended: true })); //permitir extensiones en la url
@@ -104,6 +109,8 @@ app.use('/api/carts/', routerCart)
 app.use('/auth/', routerAuth)
 app.use('/api/session/', routerSession)
 app.use('/api/users', userRouter);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/tickets', ticketRoutes);
 app.use('/api/documents', documentRouter);
 const swaggerOptions = {
   definition: {

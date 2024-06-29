@@ -2,8 +2,8 @@ const fs = require('fs').promises;
 const ProductManager = require('./ProductDao.js')
 //BD
 const CartsModel = require("../modules/cart.model.js")
-const TicketModel = require("../modules/ticket.model.js")
-const TicketDao = require("./TicketDao.js")
+//const TicketModel = require("../modules/ticket.model.js")
+//const TicketDao = require("./TicketDao.js")
 
 class Carts {
     constructor() {
@@ -49,37 +49,29 @@ class Carts {
     }
 
     //agregar producto al carrito
-    async addProductToCart(cartId, productId) {
+    async addProductToCart(cartId, productId, quantity = 1) {
         let cart;
         try {
-            //voy a traer products para validar que el productsID exista
             const productManager = new ProductManager();
             const productExists = await productManager.getProductById(productId).then(() => true).catch(() => false);
             if (!productExists) {
                 throw new Error('Error: Producto no encontrado');
             }
-            cart = await this.getCartById(cartId); //traigo el carrito
-            //const existingProduct = cart.products.find((p) => p.product._id === productId);
+            cart = await this.getCartById(cartId);
             const isProductInCart = cart.products.some(e => e.product._id.equals(productId));
-            console.log(`is product in cart: ${isProductInCart}`)
             if (isProductInCart) {
-                // Si el producto ya existe en el carrito, incrementar la cantidad
-                cart.products.find(e => e.product._id.equals(productId)).quantity += 1;
-                console.log(cart);
+                cart.products.find(e => e.product._id.equals(productId)).quantity += quantity;
                 await CartsModel.updateOne({ _id: cart._id }, cart);
             } else {
-                // Si el producto no existe, agregarlo al carrito con cantidad 1
                 cart.products.push({
                     product: productId,
-                    quantity: 1,
+                    quantity,
                 });
-                await CartsModel.updateOne({ _id: cart._id }, cart)
+                await CartsModel.updateOne({ _id: cart._id }, cart);
             }
-
-
         } catch (err) {
             console.log(err);
-            return err
+            return err;
         }
 
         return await this.getCartById(cartId);
@@ -173,9 +165,71 @@ class Carts {
             return err;
         }
     }
-
-
-    async purchaseCart(cartId, email) {
+    async purchaseCart(cartId, email, amount, userId) {
+        try {
+            const cart = await this.getCartById(cartId);
+            if (!cart) {
+                return { error: 'Carrito no encontrado' };
+            }
+    
+            const productsNotProcessed = [];
+    
+            for (const item of cart.products) {
+                const product = new ProductManager();
+                const productExists = await product.getProductById(item.product);
+                if (!productExists) {
+                    return { error: 'Producto no encontrado' };
+                }
+    
+                if (productExists.stock < item.quantity) {
+                    productsNotProcessed.push(item.product);
+                } else {
+                    const updatedStock = productExists.stock - item.quantity;
+                    await product.updateProduct(item.product._id, { stock: updatedStock });
+                }
+            }
+    
+            // Crear el ticket usando la API de tickets
+            const ticketResponse = await fetch(`http://localhost:8080/api/tickets`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cartId: cartId,
+                    amount: amount,
+                    purchaser: email,
+                    userId: userId
+                })
+            });
+    
+            if (!ticketResponse.ok) {
+                const ticketError = await ticketResponse.json();
+                return { error: ticketError.error };
+            }
+    
+            const ticket = await ticketResponse.json();
+    
+            cart.products = cart.products.filter(item => productsNotProcessed.includes(item.product.toString()));
+            await this.updateCart(cartId, cart.products);
+    
+            if (productsNotProcessed.length > 0) {
+                return { 
+                    message: 'Compra parcialmente realizada, productos no disponibles:', 
+                    data: productsNotProcessed 
+                };
+            } else {
+                return { 
+                    message: `Compra realizada exitosamente, monto: ${amount}`, 
+                    data: ticket 
+                };
+            }
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+    
+/*     async purchaseCart(cartId, email) {
         try {
             const cart = await this.getCartById(cartId);
             if (!cart) {
@@ -223,7 +277,7 @@ class Carts {
         } catch (error) {
             return { error: error.message };
         }
-    }
+    } */
     
 }
 module.exports = Carts;

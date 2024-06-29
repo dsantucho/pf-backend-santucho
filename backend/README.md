@@ -92,3 +92,11 @@ curl --location --request PUT 'http://localhost:8080/api/users/premium/666b3ac36
 3 - User con todos los documentos cargados. 
 curl --location --request PUT 'http://localhost:8080/api/users/premium/666b3d1887c6a10211d0f0c6' \
 --header 'Cookie: connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw; connect.sid=s%3Ac7gelTCcdi9d5qjYG8AiIIQUmwx_PsIG.ldwBELYBxATmSaoJJCk6kPRiIpeaJSRqF7cjPw0%2BYlw'
+
+----- ENTREGA FINAL -----
+
+/DELETE USER: 
+
+curl:
+curl --location --request DELETE 'http://localhost:8080/api/users' \
+--header 'Cookie: connect.sid=s%3AGCYtEaN9LxjB12pbfBw1OdrF_nL-Opkp.T1LQBrCJzLIsUHYMC8xHxrtTB4EK7fff%2FVqNS9OtTqw; connect.sid=s%3AGCYtEaN9LxjB12pbfBw1OdrF_nL-Opkp.T1LQBrCJzLIsUHYMC8xHxrtTB4EK7fff%2FVqNS9OtTqw'
