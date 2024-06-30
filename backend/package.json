@@ -30,7 +30,8 @@
     "winston": "^3.13.0"
   },
   "scripts": {
-    "start": "node ./src/app.js",
+    "build:css": "npx tailwindcss -i ./src/input.css -o ./src/public/css/output.css",
+    "start": "npm run build:css && node ./app",
     "dev": "nodemon src/app.js --mode dev",
     "test": "mocha \"test/**/*.test.js\""
   },
