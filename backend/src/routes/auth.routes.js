@@ -13,7 +13,7 @@ const router = new Router();
 router.post('/register',
     passport.authenticate('register', { failureRedirect: '/error' }),
     function (req, res) {
-        res.redirect('/login-view')
+        res.redirect('/')
     });
 router.get('/error', (req, res) => {
     res.send('error registro user');
