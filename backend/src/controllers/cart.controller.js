@@ -92,24 +92,7 @@ const updateProductQuantity = async (req, res) => {
     }
 };
 
-/* const purchaseCart = async (req, res) => {
-    const cartId = req.params.cid;
-    const userEmail = req.user.email;
-    try {
-        const purchaseResult = await cart.purchaseCart(cartId, userEmail);
 
-        if (purchaseResult.error) {
-            return res.status(400).json({ error: purchaseResult.error });
-        }
-
-        res.json({ 
-            message: purchaseResult.message,
-            data: purchaseResult.data
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}; */
 const purchaseCart = async (req, res) => {
     const cartId = req.params.cid;
     const { userId, userEmail, amount } = req.body;

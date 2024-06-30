@@ -232,9 +232,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     notes: ""
                 })
             });
-
+            const data = await response.json();
             if (response.ok) {
-                const data = await response.json();
                 mostrarMensajeCompra(data);
             } else {
                 const errorData = await response.json();

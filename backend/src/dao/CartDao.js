@@ -190,7 +190,8 @@ class Carts {
             }
     
             // Crear el ticket usando la API de tickets
-            const ticketResponse = await fetch(`http://localhost:8080/api/tickets`, {
+            const apiUrl = process.env.API_URL;
+            const ticketResponse = await fetch(`${apiUrl}/api/tickets`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
