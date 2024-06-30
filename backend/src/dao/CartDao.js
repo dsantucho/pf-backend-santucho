@@ -190,7 +190,7 @@ class Carts {
             }
     
             // Crear el ticket usando la API de tickets
-            const apiUrl = process.env.API_URL;
+            const apiUrl = process.env.API_URL || 'https://pf-backend-santucho-production.up.railway.app';
             const ticketResponse = await fetch(`${apiUrl}/api/tickets`, {
                 method: 'POST',
                 headers: {
