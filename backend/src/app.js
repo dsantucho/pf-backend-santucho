@@ -127,7 +127,11 @@ const specs = swaggerJSDoc(swaggerOptions)
 app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs))
 // Ruta para devolver la configuración actual
 app.get('/api/config', (req, res) => {
-  res.json({ apiUrl: process.env.PORT || 6512 });
+  res.json({ 
+    apiUrl: process.env.PORT || 6512,
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY 
+
+  });
 });
 
 /* app.get('/sessionSet', (req,res)=>{

@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', function () {
               } else {
                 apiUrl = `https://${window.location.hostname}`; // Use the current hostname for production
               }
+              stripePublishableKey = config.stripePublishableKey;
+              if (!stripePublishableKey) {
+                  throw new Error('Stripe publishable key is not defined');
+              }
 
             fetch(`${apiUrl}/api/session/current`)
                 .then(response => response.json())
@@ -140,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
           </div>
         `;
 
-        const stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY);
+        const stripe = Stripe(stripePublishableKey);
         const elements = stripe.elements();
         const cardElement = elements.create('card'); // Crear el elemento de tarjeta
         cardElement.mount('#card-element'); // Montar el elemento de tarjeta en el div con id "card-element"
