@@ -29,7 +29,7 @@ router.post('/login',
 
 router.get('/logout', async (req, res) => {
     if (!req.user) {
-        return res.redirect('/login-view');
+        return res.redirect('/');
     }
 
     try {
@@ -50,7 +50,7 @@ router.get('/logout', async (req, res) => {
                 return res.send('error en logout');
             }
 
-            res.redirect('/login-view');
+            res.redirect('/');
         });
     } catch (err) {
         console.error('Error al actualizar last_connection:', err);
