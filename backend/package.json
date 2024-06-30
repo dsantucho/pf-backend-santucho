@@ -31,7 +31,7 @@
   },
   "scripts": {
     "build:css": "npx tailwindcss -i ./src/input.css -o ./src/public/css/output.css",
-    "start": "npm run build:css && node ./app",
+    "start": "npm run build:css && node src/app.js",
     "dev": "nodemon src/app.js --mode dev",
     "test": "mocha \"test/**/*.test.js\""
   },
