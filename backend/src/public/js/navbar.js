@@ -4,7 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
 fetch('/api/config')
     .then(response => response.json())
     .then(config => {
-        apiUrl = `http://localhost:${config.apiUrl}`;
+        if (window.location.hostname === 'localhost') {
+            apiUrl = `http://localhost:${config.apiUrl}`;
+          } else {
+            apiUrl = `https://${window.location.hostname}`; // Use the current hostname for production
+          }
     })
     .catch(error => {
         console.error('Error al obtener la configuración del servidor:', error);

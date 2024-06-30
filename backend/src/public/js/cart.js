@@ -6,7 +6,11 @@ document.addEventListener('DOMContentLoaded', function () {
     fetch('/api/config')
         .then(response => response.json())
         .then(config => {
-            apiUrl = `http://localhost:${config.apiUrl}`;
+            if (window.location.hostname === 'localhost') {
+                apiUrl = `http://localhost:${config.apiUrl}`;
+              } else {
+                apiUrl = `https://${window.location.hostname}`; // Use the current hostname for production
+              }
 
             fetch(`${apiUrl}/api/session/current`)
                 .then(response => response.json())
