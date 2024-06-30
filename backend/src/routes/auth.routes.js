@@ -146,6 +146,6 @@ router.post('/reset-password/:token', async (req, res) => {
     user.resetPasswordExpires = undefined;
 
     await user.save();
-    res.redirect('/login-view');
+    res.redirect('/');
 });
 module.exports = router;
